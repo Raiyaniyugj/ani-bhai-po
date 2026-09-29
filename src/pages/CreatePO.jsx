@@ -909,19 +909,28 @@ export default function CreatePO() {
           </datalist>
         </div>
         
-        {/* 2. Two tiles side by side: PO NUMBER and TOTAL QUANTITY */}
-        <div className="flex items-center gap-3 w-full">
+        {/* 2. Three tiles side by side: PO NUMBER, PRODUCTS, and TOTAL QUANTITY */}
+        <div className="grid grid-cols-3 gap-3 w-full">
           {/* PO Number Badge */}
-          <div className="bg-indigo-50 px-4 py-3 rounded-2xl border border-indigo-100 flex flex-col items-center justify-center flex-1 min-w-0">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 mb-1 truncate">PO Number</span>
-            <span className="text-xl sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
+          <div className="bg-indigo-50 px-2 py-3 rounded-2xl border border-indigo-100 flex flex-col items-center justify-center min-w-0">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-700 mb-1 truncate">PO Number</span>
+            <span className="text-lg font-black font-mono text-indigo-900">{nextPoNo}</span>
+          </div>
+
+          {/* Total Products Badge */}
+          <div className="bg-[#f9f5ff] px-2 py-3 rounded-2xl border border-[#e9d5ff] flex flex-col items-center justify-center min-w-0 shadow-sm">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[#7e22ce] mb-1 truncate">Products</span>
+            <span className="text-lg font-black text-[#581c87]">{totalProductsCount}</span>
+            <span className="text-[10px] text-[#9333ea] font-medium mt-0.5 truncate">
+              {totalProductsCount === 1 ? '1 item' : `${totalProductsCount} items`}
+            </span>
           </div>
 
           {/* Total Quantity Badge */}
-          <div className="bg-white px-4 py-3 rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center flex-1 min-w-0 shadow-sm">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Total Qty</span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">{sumTotalQty}</span>
-            <span className="text-[11px] text-[#565b73] font-medium mt-0.5 truncate">
+          <div className="bg-white px-2 py-3 rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center min-w-0 shadow-sm">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Total Qty</span>
+            <span className="text-lg font-extrabold text-[#14172b]">{sumTotalQty}</span>
+            <span className="text-[10px] text-[#565b73] font-medium mt-0.5 truncate">
               Packed: <b className="text-indigo-700">{totalPackedPcs} pcs</b>
             </span>
           </div>
