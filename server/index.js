@@ -70,8 +70,17 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    console.error('Database connection error:', err);
-    res.status(500).json({ message: 'Database connection failed', error: err.message });
+    const rawUri = getMongoUri();
+    const sanitizedUri = rawUri ? rawUri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@') : 'NOT_SET';
+    console.error(`Database connection error [Target: ${sanitizedUri}]:`, err);
+    res.status(500).json({ 
+      message: 'Database connection failed', 
+      configuredUri: sanitizedUri,
+      hint: sanitizedUri.includes('localhost') || sanitizedUri.includes('127.0.0.1')
+        ? 'Your Vercel environment variable MONGO_URI is set to localhost. Cloud deployments on Vercel cannot reach your local computer. Please provide a MongoDB Atlas cloud connection string (mongodb+srv://...).'
+        : 'Ensure your MongoDB Atlas network access allows access from anywhere (0.0.0.0/0).',
+      error: err.message 
+    });
   }
 });
 
