@@ -408,7 +408,7 @@ export default function CreatePO() {
   };
 
   // Called when Excel file is imported and saved
-  const handleImportSuccess = ({ rawItems, companyName: importedCompany, fileName, totalQtySum }) => {
+  const handleImportSuccess = ({ rawItems, companyName: importedCompany, fileName, totalQtySum, products: savedProducts }) => {
     if (importedCompany && !companyName) {
       setCompanyName(importedCompany);
     }
@@ -419,6 +419,12 @@ export default function CreatePO() {
       totalQty: totalQtySum
     });
 
+    if (savedProducts && savedProducts.length > 0) {
+      setProducts(savedProducts.map(p => ({
+        ...p,
+        packedQty: 0
+      })));
+    }
 
     setSaveSuccessMsg(`Excel Imported: ${rawItems.length} products loaded from ${fileName} (${totalQtySum} total requested pcs)`);
     setTimeout(() => setSaveSuccessMsg(''), 6000);
@@ -714,7 +720,7 @@ export default function CreatePO() {
       const savedPO = await createPO({
         companyName,
         totalPcs: currentPoPcs > 0 ? currentPoPcs : totalPackedPcs,
-        items: products.map(p => ({ 
+        items: products.filter(p => p.packedQty > 0).map(p => ({ 
           barcode: p.barcode, 
           name: p.name, 
           companyName: p.companyName,
@@ -836,6 +842,15 @@ export default function CreatePO() {
             // Check if already in list, if not add it
             if (!products.some(p => p.barcode === prod.barcode)) {
               setProducts(prev => [...prev, prod]);
+              
+              // Push to imported file database tracking as well
+              if (importedFileMeta) {
+                setImportedFileMeta(prev => ({
+                  ...prev,
+                  count: prev.count + 1,
+                  totalQty: prev.totalQty + (prod.totalQty || 0)
+                }));
+              }
             }
             setActiveProduct(prod);
             setBarcodeInput(prod.barcode);
