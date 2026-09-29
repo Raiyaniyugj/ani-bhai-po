@@ -1,6 +1,18 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
+// Dynamically determine API endpoint: strictly use '/api' for all live domains (Vercel/mobile)
+const getApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+    return '/api';
+  }
+  return '/api';
+};
+
+const API_URL = getApiUrl();
 
 export const fetchProductByBarcode = async (barcode) => {
   try {
@@ -83,6 +95,7 @@ export const bulkImportProducts = async (products, companyName = '') => {
     const response = await axios.post(`${API_URL}/products/bulk`, { products, companyName });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to import products');
+    const msg = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to import products';
+    throw new Error(msg);
   }
 };
