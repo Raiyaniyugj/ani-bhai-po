@@ -159,49 +159,49 @@ export default function ExcelImportModal({
   const totalQuantitySum = parsedRows.reduce((sum, r) => sum + (r.totalQty || 0), 0);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-fade-in">
         
         {/* Modal Header */}
-        <div className="p-5 bg-slate-900 text-white flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
-              <FileSpreadsheet size={22} />
+        <div className="p-3.5 md:p-5 bg-slate-900 text-white flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-2 md:gap-2.5">
+            <div className="p-1.5 md:p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
+              <FileSpreadsheet size={20} className="md:w-[22px] md:h-[22px]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg leading-tight">Import Excel Sheet</h3>
-              <p className="text-xs text-slate-400">Match ASIN, Model Number & Quantity Requested</p>
+              <h3 className="font-bold text-base md:text-lg leading-tight">Import Excel Sheet</h3>
+              <p className="text-[10px] md:text-xs text-slate-400">Match ASIN, Model Number & Quantity Requested</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
             className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
           >
-            <X size={20} />
+            <X size={18} className="md:w-[20px] md:h-[20px]" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-4 md:p-6 overflow-y-auto space-y-4 md:space-y-5 flex-1">
           
           {/* Error Message */}
           {errorMsg && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-700 animate-fade-in">
-              <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-500" />
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2 text-xs text-rose-700 animate-fade-in">
+              <AlertCircle size={14} className="shrink-0 mt-0.5 text-rose-500" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Company Assignment */}
-          <div className="space-y-1.5">
+          <div className="space-y-1 md:space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-              <Building2 size={15} className="text-indigo-600" /> Company Name (Optional)
+              <Building2 size={14} className="text-indigo-600" /> Company Name (Optional)
             </label>
             <input 
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="e.g. Amazon Fulfillment / Apex Tech Solutions"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:bg-white focus:border-indigo-500 transition-all"
+              className="w-full px-3 py-2 md:px-4 md:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-medium outline-none focus:bg-white focus:border-indigo-500 transition-all"
               list="modal-company-list"
             />
             <datalist id="modal-company-list">
@@ -215,7 +215,7 @@ export default function ExcelImportModal({
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+            className={`border-2 border-dashed rounded-2xl p-4 md:p-6 text-center cursor-pointer transition-all ${
               isDragOver 
                 ? 'border-indigo-500 bg-indigo-50/50 scale-[0.99]' 
                 : file 
@@ -231,25 +231,25 @@ export default function ExcelImportModal({
               className="hidden" 
             />
             
-            <div className="flex flex-col items-center gap-2">
-              <div className={`p-3 rounded-full ${file ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-50 text-indigo-600'}`}>
-                {file ? <Check size={28} /> : <Upload size={28} />}
+            <div className="flex flex-col items-center gap-1.5 md:gap-2">
+              <div className={`p-2.5 md:p-3 rounded-full ${file ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                {file ? <Check size={24} className="md:w-[28px] md:h-[28px]" /> : <Upload size={24} className="md:w-[28px] md:h-[28px]" />}
               </div>
               
               {file ? (
                 <div>
-                  <p className="font-bold text-slate-800 text-sm">{file.name}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="font-bold text-slate-800 text-xs md:text-sm">{file.name}</p>
+                  <p className="text-[10px] md:text-xs text-slate-500 mt-0.5">
                     {(file.size / 1024).toFixed(1)} KB • Click or drag to replace
                   </p>
                 </div>
               ) : (
                 <div>
-                  <p className="font-semibold text-slate-800 text-sm">
+                  <p className="font-semibold text-slate-800 text-xs md:text-sm">
                     Click to browse or drag & drop Excel sheet
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Supports .xlsx, .xls, .csv (Headers: <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[11px] text-slate-700">ASIN</code>, <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[11px] text-slate-700">Model Number</code>, <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[11px] text-slate-700">Quantity Requested</code>)
+                  <p className="text-[10px] md:text-xs text-slate-400 mt-1">
+                    Supports .xlsx, .xls, .csv (Headers: <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[10px] md:text-[11px] text-slate-700">ASIN</code>, <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[10px] md:text-[11px] text-slate-700">Model Number</code>, <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[10px] md:text-[11px] text-slate-700">Quantity Requested</code>)
                   </p>
                 </div>
               )}
@@ -258,10 +258,10 @@ export default function ExcelImportModal({
 
           {/* Parsed Summary & Preview */}
           {parsedRows.length > 0 && (
-            <div className="space-y-3 animate-fade-in">
+            <div className="space-y-2 md:space-y-3 animate-fade-in">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Eye size={15} className="text-indigo-500" /> Data Preview ({parsedRows.length} items)
+                <span className="text-[10px] md:text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1 md:gap-1.5">
+                  <Eye size={14} className="text-indigo-500" /> Data Preview ({parsedRows.length} items)
                 </span>
                 <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
                   Total Requested Qty: <b>{totalQuantitySum}</b> pcs
@@ -305,11 +305,11 @@ export default function ExcelImportModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-5 bg-slate-50 border-t border-slate-100 flex justify-between items-center shrink-0">
+        <div className="p-3.5 md:p-5 bg-slate-50 border-t border-slate-100 flex justify-between items-center shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
+            className="px-3 py-2 md:px-4 md:py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] md:text-xs font-semibold transition-colors"
           >
             Cancel
           </button>
@@ -318,16 +318,16 @@ export default function ExcelImportModal({
             type="button"
             onClick={handleImportAndSave}
             disabled={parsedRows.length === 0 || isProcessing}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 md:px-5 md:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] md:text-xs font-bold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 md:gap-2"
           >
             {isProcessing ? (
               <>
-                <RefreshCw size={15} className="animate-spin" />
+                <RefreshCw size={14} className="animate-spin md:w-[15px] md:h-[15px]" />
                 Saving to Database...
               </>
             ) : (
               <>
-                <Check size={16} />
+                <Check size={14} className="md:w-[16px] md:h-[16px]" />
                 Import & Save {parsedRows.length > 0 ? `(${parsedRows.length} Products)` : ''}
               </>
             )}
