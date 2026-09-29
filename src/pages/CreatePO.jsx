@@ -988,19 +988,19 @@ export default function CreatePO() {
         <div className="lg:col-span-1 space-y-6">
           
           {/* Scanner Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 sm:p-4 space-y-3">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <ScanLine size={20} className="text-indigo-500" /> Packing Scanner
+              <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <ScanLine size={18} className="text-indigo-500" /> Packing Scanner
               </h2>
-              <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+              <span className="text-[10px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
                 Scan or Manual
               </span>
             </div>
             
-            <form onSubmit={handleAdd} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600">Barcode</label>
+            <form onSubmit={handleAdd} className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-600">Barcode</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <input 
@@ -1012,31 +1012,31 @@ export default function CreatePO() {
                           lookupBarcode(barcodeInput);
                         }
                       }}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono"
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono text-sm"
                       placeholder="Scan or type barcode..."
                       autoFocus
                     />
-                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
                   <button 
                     type="button"
-                    className="px-4 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 font-medium shrink-0"
+                    className="px-3 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 font-medium shrink-0"
                     onClick={() => setIsCameraOpen(true)}
                     title="Open Camera Scanner"
                   >
-                    <ScanLine size={18} />
+                    <ScanLine size={16} />
                   </button>
                 </div>
               </div>
 
               {/* Model Number */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600">Model Number</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-600">Model Number</label>
                 <input 
                   type="text"
                   value={productNameInput}
                   onChange={handleProductNameChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 font-medium text-slate-800 transition-all"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 font-medium text-slate-800 text-sm transition-all"
                   placeholder="Enter Model Number..."
                 />
               </div>
@@ -1063,14 +1063,14 @@ export default function CreatePO() {
               )}
 
               {/* Main Bracket: Total Qty / Remaining & Pcs */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-semibold text-slate-700">
-                      Total Qty <span className="text-[10px] text-orange-600 font-bold bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded ml-0.5">Remaining</span>
+                    <label className="text-[11px] font-semibold text-slate-700">
+                      Total Qty <span className="text-[9px] text-orange-600 font-bold bg-orange-50 border border-orange-200 px-1 py-0.5 rounded ml-0.5">Remaining</span>
                     </label>
                     {activeProduct && activeProduct.packedQty > 0 && (
-                      <span className="text-[11px] text-slate-500 font-medium">
+                      <span className="text-[10px] text-slate-500 font-medium">
                         Packed: <strong className="text-indigo-600">{activeProduct.packedQty}</strong>
                       </span>
                     )}
@@ -1080,15 +1080,15 @@ export default function CreatePO() {
                     min="0"
                     value={remainingInput}
                     onChange={handleRemainingChange}
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-slate-800 text-lg"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-slate-800 text-base"
                     placeholder="Remaining"
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-semibold text-indigo-600">Pcs</label>
+                    <label className="text-[11px] font-semibold text-indigo-600">Pcs</label>
                     {activeProduct && activeProduct.packedQty > 0 && (
-                      <span className="text-[11px] text-slate-500 font-medium">
+                      <span className="text-[10px] text-slate-500 font-medium">
                         Packed: <strong className="text-indigo-600">{activeProduct.packedQty}</strong>
                       </span>
                     )}
@@ -1099,19 +1099,19 @@ export default function CreatePO() {
                     min="1"
                     value={pcsInput}
                     onChange={(e) => setPcsInput(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-indigo-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-lg"
+                    className="w-full px-3 py-2 bg-white border border-indigo-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-base"
                     placeholder="Qty to pack"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5 pt-1">
-                <label className="text-xs font-semibold text-slate-600">Target Box</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-600">Target Box</label>
                 <input 
                   list="box-options"
                   value={activeBoxName}
                   onChange={handleBoxChange}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-medium text-slate-800"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-medium text-slate-800 text-sm"
                   placeholder="Type or select a box..."
                 />
                 <datalist id="box-options">
@@ -1124,9 +1124,9 @@ export default function CreatePO() {
               <button 
                 type="submit"
                 disabled={!pcsInput || parseInt(pcsInput, 10) <= 0}
-                className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4 shadow-sm"
+                className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 shadow-sm text-sm"
               >
-                <Check size={20} /> Pack Items
+                <Check size={18} /> Pack Items
               </button>
             </form>
           </div>
