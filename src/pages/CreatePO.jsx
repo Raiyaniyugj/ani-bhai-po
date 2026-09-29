@@ -25,8 +25,8 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fade-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+      <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl max-w-md w-full overflow-y-auto max-h-[85vh] md:max-h-none border border-slate-200 animate-fade-in">
         <div className="p-5 bg-slate-900 text-white flex justify-between items-center">
           <h3 className="font-bold flex items-center gap-2">
             <Pencil size={18} className="text-indigo-400" /> Edit Product
@@ -160,8 +160,8 @@ const AddProductModal = ({ onClose, onSave, activeCompanyName }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fade-in">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+      <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl max-w-md w-full overflow-y-auto max-h-[85vh] md:max-h-none border border-slate-200 animate-fade-in">
         <div className="p-5 bg-slate-900 text-white flex justify-between items-center">
           <h3 className="font-bold flex items-center gap-2">
             <PlusCircle size={18} className="text-emerald-400" /> Add New Product
@@ -864,11 +864,12 @@ export default function CreatePO() {
       )}
 
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div className="flex-1 w-full max-w-md space-y-2">
+      <div className="flex flex-col gap-4">
+        {/* 1. Company Name card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-3 sm:p-4 flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Building2 size={16} className="text-indigo-500" /> Company Name
+            <label className="text-[12px] font-bold text-[#565b73] flex items-center gap-2 uppercase tracking-wider">
+              <Building2 size={20} className="text-indigo-700" /> Company Name
             </label>
             <button 
               type="button" 
@@ -876,8 +877,7 @@ export default function CreatePO() {
                 setCompanyName(''); 
                 setTimeout(() => document.getElementById('company-input')?.focus(), 10); 
               }} 
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded"
-              title="Add a new company"
+              className="text-[12px] font-bold text-indigo-700 bg-indigo-100 px-3 py-1.5 rounded-full flex items-center gap-1"
             >
               <PlusCircle size={14} /> Add New
             </button>
@@ -886,7 +886,7 @@ export default function CreatePO() {
             id="company-input"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all font-medium"
+            className="w-full h-[52px] px-4 bg-[#f8f9fc] border-[1.5px] border-[#e4e6f0] rounded-2xl outline-none focus:bg-white focus:border-indigo-700 transition-all font-medium text-[15px]"
             placeholder="e.g. Acme Corp"
             list="company-list"
           />
@@ -895,73 +895,40 @@ export default function CreatePO() {
           </datalist>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto justify-between xl:justify-end flex-wrap">
-          {/* Stat Badges: PO Number, Total Products & Total Quantity */}
-          <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Sequential Ascending PO Number Badge */}
-            <div className="bg-indigo-50 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-indigo-100 flex flex-col items-center flex-1 sm:flex-none min-w-0 sm:min-w-[120px]">
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-0.5 truncate">PO Number</span>
-              <span className="text-base sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
-            </div>
-
-            {/* Total Products Badge */}
-            <div className="bg-purple-50 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-purple-100 flex flex-col items-center flex-1 sm:flex-none min-w-0 sm:min-w-[120px]">
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-purple-700 mb-0.5 truncate">Products</span>
-              <span className="text-base sm:text-2xl font-black font-mono text-purple-900">{totalProductsCount}</span>
-              <span className="text-[9px] sm:text-[11px] text-purple-600 font-medium mt-0.5 truncate">
-                {totalProductsCount === 1 ? '1 item' : `${totalProductsCount} items`}
-              </span>
-            </div>
-
-            {/* Total Quantity Badge */}
-            <div className="bg-slate-50 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-slate-200 flex flex-col items-center flex-1 sm:flex-none min-w-0 sm:min-w-[120px]">
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-0.5 truncate">Total Qty</span>
-              <span className="text-base sm:text-2xl font-extrabold text-slate-800">{sumTotalQty}</span>
-              <span className="text-[9px] sm:text-[11px] text-slate-500 font-medium mt-0.5 truncate">
-                Packed: <b className="text-indigo-600">{totalPackedPcs}</b>
-              </span>
-            </div>
+        {/* 2. Two tiles side by side: PO NUMBER and TOTAL QUANTITY */}
+        <div className="flex items-center gap-3 w-full">
+          {/* PO Number Badge */}
+          <div className="bg-indigo-50 px-4 py-3 rounded-2xl border border-indigo-100 flex flex-col items-center justify-center flex-1 min-w-0">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 mb-1 truncate">PO Number</span>
+            <span className="text-xl sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
           </div>
 
+          {/* Total Quantity Badge */}
+          <div className="bg-white px-4 py-3 rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center flex-1 min-w-0 shadow-sm">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Total Qty</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">{sumTotalQty}</span>
+            <span className="text-[11px] text-[#565b73] font-medium mt-0.5 truncate">
+              Packed: <b className="text-indigo-700">{totalPackedPcs} pcs</b>
+            </span>
+          </div>
+        </div>
 
-
+        {/* 3. Action row */}
+        <div className="flex items-center gap-3 w-full">
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
-            className="px-4 py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-2 text-sm shrink-0 shadow-sm flex-1 sm:flex-none"
-            title="Import Excel order sheet"
+            className="h-[52px] flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
           >
-            <FileSpreadsheet size={18} className="text-emerald-600" />
+            <FileSpreadsheet size={20} className="text-emerald-700" />
             Import Excel
           </button>
-
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            className="px-4 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold rounded-xl border border-blue-200 transition-colors flex items-center justify-center gap-2 text-sm shrink-0 shadow-sm flex-1 sm:flex-none"
-            title="Export current order to Excel"
-          >
-            <Download size={18} className="text-blue-600" />
-            Export Excel
-          </button>
-
           <button
             onClick={handleStartNewPO}
-            className="px-4 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm shrink-0 flex-1 sm:flex-none"
-            title="Start a fresh PO"
+            className="h-[52px] flex-1 bg-slate-100 hover:bg-slate-200 text-[#14172b] font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
           >
-            <PlusCircle size={18} />
+            <PlusCircle size={20} className="text-[#565b73]" />
             New PO
-          </button>
-
-          {/* Save PO - Visible on desktop, moved next to Box on mobile */}
-          <button
-            onClick={handleSavePO}
-            disabled={isSaving || products.length === 0}
-            className="hidden sm:flex px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2 shadow-sm shrink-0 text-sm"
-          >
-            <Save size={18} />
-            {isSaving ? 'Saving...' : 'Save PO'}
           </button>
         </div>
       </div>
@@ -1174,7 +1141,102 @@ export default function CreatePO() {
                 )}
               </div>
             </div>
-            <div className="overflow-x-auto">
+            
+            {/* Mobile Cards (Hidden on Desktop) */}
+            <div className="md:hidden flex flex-col gap-3 p-3 bg-[#f4f5fa]">
+              {products.length === 0 && !isDraftNewItem ? (
+                <div className="bg-white rounded-2xl p-6 text-center text-[#565b73] border border-[#e4e6f0] shadow-sm flex flex-col items-center gap-3">
+                  <Package size={48} className="text-[#a0a5b8]" />
+                  <p className="font-bold text-[#14172b]">No products in this order yet.</p>
+                  <p className="text-[13px]">
+                    Scan a barcode, add a product, or <button type="button" onClick={() => setIsImportModalOpen(true)} className="text-indigo-700 font-bold underline">Import Excel</button>
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {isDraftNewItem && (
+                    <div className="bg-indigo-50 border-2 border-indigo-500 rounded-2xl p-4 shadow-sm animate-fade-in flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-indigo-900 text-[15px] flex items-center gap-2">
+                            {productNameInput || 'New Product'}
+                            <span className="text-[10px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded uppercase tracking-wider">Scanning...</span>
+                          </span>
+                          <span className="text-[13px] text-indigo-700 font-mono mt-1">{draftBarcode}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 bg-white border border-indigo-200 rounded-xl p-2 flex flex-col items-center">
+                          <span className="text-[10px] font-bold text-[#565b73] uppercase">Total</span>
+                          <span className="font-bold text-[#14172b]">{totalValue}</span>
+                        </div>
+                        <div className="flex-1 bg-indigo-100 border border-indigo-200 rounded-xl p-2 flex flex-col items-center">
+                          <span className="text-[10px] font-bold text-indigo-700 uppercase">Packed</span>
+                          <span className="font-bold text-indigo-700">0</span>
+                        </div>
+                        <div className="flex-1 bg-orange-100 border border-orange-200 rounded-xl p-2 flex flex-col items-center">
+                          <span className="text-[10px] font-bold text-orange-800 uppercase">Left</span>
+                          <span className="font-bold text-orange-800">{currentRemaining}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {displayedProducts.map(p => {
+                    const remain = p.totalQty - (p.historicalPacked || 0) - p.packedQty;
+                    const isRowActive = activeProduct && (activeProduct.barcode === p.barcode || (p.asin && activeProduct.asin === p.asin));
+                    return (
+                      <div 
+                        key={p.barcode}
+                        onClick={() => {
+                          setActiveProduct(p);
+                          setBarcodeInput(p.barcode);
+                          setProductNameInput(p.name || p.modelNumber || p.asin);
+                          const rem = Math.max(0, p.totalQty - (p.historicalPacked || 0) - p.packedQty);
+                          setRemainingInput(rem.toString());
+                          if (document.getElementById('mobile-pcs-input')) document.getElementById('mobile-pcs-input').focus();
+                        }}
+                        className={`bg-white rounded-2xl p-4 shadow-sm border transition-colors flex flex-col gap-3 ${isRowActive ? 'border-indigo-500 bg-indigo-50/30' : 'border-[#e4e6f0]'}`}
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-[#14172b] text-[15px] truncate flex items-center gap-2">
+                              {p.name || p.modelNumber || p.asin || p.barcode}
+                              {isRowActive && <span className="text-[10px] bg-indigo-700 text-white px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Active</span>}
+                            </span>
+                            <span className="text-[13px] text-[#565b73] font-mono mt-0.5 truncate">{p.barcode}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingProduct(p);
+                            }}
+                            className="w-[44px] h-[44px] bg-[#f4f5fa] hover:bg-[#e4e6f0] text-[#565b73] rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex-1 bg-[#f4f5fa] rounded-xl p-2 flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-[#565b73] uppercase">Total</span>
+                            <span className="font-bold text-[#14172b]">{p.totalQty}</span>
+                          </div>
+                          <div className="flex-1 bg-indigo-50 rounded-xl p-2 flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-indigo-700 uppercase">Packed</span>
+                            <span className="font-bold text-indigo-700">{p.packedQty}</span>
+                          </div>
+                          <div className={`flex-1 rounded-xl p-2 flex flex-col items-center ${remain <= 0 ? 'bg-emerald-50' : 'bg-orange-50'}`}>
+                            <span className={`text-[10px] font-bold uppercase ${remain <= 0 ? 'text-emerald-700' : 'text-orange-800'}`}>Left</span>
+                            <span className={`font-bold ${remain <= 0 ? 'text-emerald-700' : 'text-orange-800'}`}>{remain}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+<div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider bg-white">
@@ -1369,7 +1431,19 @@ export default function CreatePO() {
           </div>
 
         </div>
+      
+      {/* Mobile Fixed Save PO Bar */}
+      <div className="md:hidden fixed bottom-[76px] left-0 right-0 p-3 bg-white border-t border-[#e4e6f0] z-40">
+        <button
+          onClick={handleSavePO}
+          disabled={isSaving || products.length === 0}
+          className="w-full h-[52px] bg-emerald-700 hover:bg-emerald-800 disabled:bg-[#e4e6f0] disabled:text-[#a0a5b8] text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
+        >
+          <Save size={20} />
+          {isSaving ? 'Saving...' : (products.length > 0 ? `Save PO · ${sumTotalQty} pcs` : 'Save PO')}
+        </button>
       </div>
+  </div>
     </div>
   );
 }
