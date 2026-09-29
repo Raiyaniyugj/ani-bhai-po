@@ -1420,7 +1420,7 @@ export default function CreatePO() {
             </div>
 
             {/* Save & New PO Buttons DOWN the Box */}
-            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+            <div className="pt-2 hidden md:flex flex-row gap-3">
               <button
                 type="button"
                 onClick={handleStartNewPO}
