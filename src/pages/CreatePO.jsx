@@ -955,25 +955,7 @@ export default function CreatePO() {
         </div>
       </div>
 
-      {/* Imported File Info Banner */}
-      {importedFileMeta && (
-        <div className="bg-emerald-50/90 border border-emerald-200 text-emerald-900 px-5 py-3 rounded-2xl flex items-center justify-between shadow-sm animate-fade-in">
-          <div className="flex items-center gap-2.5 font-medium text-xs sm:text-sm">
-            <FileSpreadsheet className="text-emerald-600 shrink-0" size={18} />
-            <span>
-              Order File: <strong className="font-bold text-emerald-950">{importedFileMeta.fileName}</strong> • Loaded <b>{importedFileMeta.count}</b> products ({importedFileMeta.totalQty} requested pcs)
-            </span>
-          </div>
-          <button 
-            type="button"
-            onClick={() => setImportedFileMeta(null)} 
-            className="text-emerald-700 hover:text-emerald-950 p-1"
-            title="Dismiss banner"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
