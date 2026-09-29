@@ -7,6 +7,11 @@ const cors = require('cors');
 
 const PO = require('./models/PO');
 const Product = require('./models/Product');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const auth = require('./middleware/auth');
+const User = require('./models/User');
+
 
 const app = express();
 app.use(cors());
@@ -115,7 +120,7 @@ app.get('/api/products/:barcode', async (req, res) => {
 });
 
 // Bulk upsert products (from Excel import)
-app.post('/api/products/bulk', async (req, res) => {
+app.post('/api/products/bulk', auth, async (req, res) => {
   try {
     const { products, companyName } = req.body;
     if (!Array.isArray(products) || products.length === 0) {
@@ -184,9 +189,9 @@ app.post('/api/products/bulk', async (req, res) => {
 });
 
 // Get all Products
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', auth, async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -194,7 +199,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // Add new Product
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', auth, async (req, res) => {
   try {
     const { barcode, name, asin, modelNumber, totalQty, price, companyName } = req.body;
     

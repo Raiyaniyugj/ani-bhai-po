@@ -1,4 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AuthPage from './pages/AuthPage';
+
 import CreatePO from './pages/CreatePO';
 import POList from './pages/POList';
 import CompanyDashboard from './pages/CompanyDashboard';
@@ -7,7 +10,17 @@ import { FileText, PlusCircle, LayoutDashboard, ScanLine, QrCode } from 'lucide-
 import CameraScanner from './components/CameraScanner';
 import { useState } from 'react';
 
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#f4f5fa]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700"></div></div>;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+};
+
 function Navigation() {
+  const { user } = useAuth();
+  if (!user) return null;
   const location = useLocation();
   const path = location.pathname;
 
@@ -107,10 +120,37 @@ function Navigation() {
   );
 }
 
+
+const AuthHeader = () => {
+  const { user, logout } = useAuth();
+  if (!user) return null;
+  return (
+    <header className="bg-white shadow-sm border-b border-[#e4e6f0]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+              P
+            </div>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">PO System</h1>
+          </div>
+          <div className="flex items-center gap-6">
+            <Navigation />
+            <button onClick={logout} className="text-sm font-medium text-slate-500 hover:text-red-600 transition-colors hidden md:block">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#f4f5fa] text-[#14172b] font-jakarta">
+      <AuthProvider>
+        <div className="min-h-screen bg-[#f4f5fa] text-[#14172b] font-jakarta">
         <header className="bg-white shadow-sm border-b border-[#e4e6f0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
@@ -129,13 +169,15 @@ function App() {
         <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-8">
           <Routes>
             <Route path="/" element={<Navigate to="/create" replace />} />
-            <Route path="/create" element={<CreatePO />} />
-            <Route path="/list" element={<POList />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/dashboard" element={<CompanyDashboard />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/create" element={<ProtectedRoute><CreatePO /></ProtectedRoute>} />
+            <Route path="/list" element={<ProtectedRoute><POList /></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
           </Routes>
         </main>
-      </div>
+        </div>
+      </AuthProvider>
     </Router>
   );
 }

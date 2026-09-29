@@ -23,6 +23,7 @@ const boxSchema = new mongoose.Schema({
 
 const poSchema = new mongoose.Schema({
   poNo: { type: String, required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   boxNo: { type: String },
   totalPcs: { type: Number, default: 0 },
   companyName: { type: String, required: true },
