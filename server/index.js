@@ -1,4 +1,6 @@
-require('dotenv').config();
+if (!process.env.VERCEL) {
+  require('dotenv').config();
+}
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || (process.env.VERCEL ? '' : 'mongodb://localhost:27017/po_app');
+const getMongoUri = () => process.env.MONGO_URI || process.env.MONGODB_URI || (!process.env.VERCEL ? 'mongodb://localhost:27017/po_app' : '');
 
 // Serverless-friendly cached MongoDB connection
 let cached = global.mongoose;
@@ -23,14 +25,15 @@ async function connectDB() {
   if (cached.conn) {
     return cached.conn;
   }
-  if (!MONGO_URI) {
-    throw new Error('MONGO_URI or MONGODB_URI is not set in Vercel Project Environment Variables. Please provide a MongoDB Atlas connection string.');
+  const mongoUri = getMongoUri();
+  if (!mongoUri) {
+    throw new Error('MONGO_URI is not set in Vercel. Please add your MongoDB Atlas connection string to your Vercel Project Environment Variables.');
   }
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
     };
-    cached.promise = mongoose.connect(MONGO_URI, opts).then(async (m) => {
+    cached.promise = mongoose.connect(mongoUri, opts).then(async (m) => {
       console.log('Connected to MongoDB');
       try {
         const count = await Product.countDocuments();
