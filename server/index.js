@@ -13,26 +13,61 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/po_app';
 
-// Connect to MongoDB
-mongoose.connect(MONGO_URI)
-  .then(async () => {
-    console.log('Connected to MongoDB');
-    // Seed initial products if empty
-    const count = await Product.countDocuments();
-    if (count === 0) {
-      await Product.insertMany([
-        { barcode: '123456789', name: 'Premium Wireless Headphones', price: 199.99 },
-        { barcode: '987654321', name: 'Ergonomic Office Chair', price: 249.50 },
-        { barcode: '111222333', name: 'Mechanical Keyboard RGB', price: 129.00 },
-        { barcode: '444555666', name: '4K Ultra HD Monitor', price: 349.99 },
-      ]);
-      console.log('Seeded database with mock products');
-    }
-  })
-  .catch(err => {
-    console.error('Failed to connect to MongoDB. Make sure MongoDB is running locally or MONGO_URI is set.');
-    console.error(err);
-  });
+// Serverless-friendly cached MongoDB connection
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+    cached.promise = mongoose.connect(MONGO_URI, opts).then(async (m) => {
+      console.log('Connected to MongoDB');
+      try {
+        const count = await Product.countDocuments();
+        if (count === 0) {
+          await Product.insertMany([
+            { barcode: '123456789', name: 'Premium Wireless Headphones', price: 199.99 },
+            { barcode: '987654321', name: 'Ergonomic Office Chair', price: 249.50 },
+            { barcode: '111222333', name: 'Mechanical Keyboard RGB', price: 129.00 },
+            { barcode: '444555666', name: '4K Ultra HD Monitor', price: 349.99 },
+          ]);
+        }
+      } catch (seedErr) {
+        console.error('Error during initial product seed:', seedErr);
+      }
+      return m;
+    }).catch(err => {
+      cached.promise = null;
+      throw err;
+    });
+  }
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+  return cached.conn;
+}
+
+// Ensure database is connected before handling any API request
+app.use(async (req, res, next) => {
+  if (!req.path.startsWith('/api')) return next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection error:', err);
+    res.status(500).json({ message: 'Database connection failed', error: err.message });
+  }
+});
 
 // --- API Endpoints ---
 
