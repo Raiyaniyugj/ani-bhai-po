@@ -419,13 +419,6 @@ export default function CreatePO() {
       totalQty: totalQtySum
     });
 
-    if (savedProducts && savedProducts.length > 0) {
-      setProducts(savedProducts.map(p => ({
-        ...p,
-        packedQty: 0
-      })));
-    }
-
     setSaveSuccessMsg(`Excel Imported: ${rawItems.length} products loaded from ${fileName} (${totalQtySum} total requested pcs)`);
     setTimeout(() => setSaveSuccessMsg(''), 6000);
   };
