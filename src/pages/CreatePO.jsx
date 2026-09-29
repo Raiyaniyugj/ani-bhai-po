@@ -1302,23 +1302,10 @@ export default function CreatePO() {
 
           {/* Boxes Summary */}
           <div className="space-y-3">
-            {/* Header for boxes with mobile Save PO button */}
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-bold text-slate-800 flex items-center gap-2 text-base">
                 <Box size={20} className="text-indigo-500" /> Boxes ({boxes.length})
               </h2>
-
-              {/* Prominent Save PO button next to Box for mobile */}
-              <button
-                type="button"
-                onClick={handleSavePO}
-                disabled={isSaving || products.length === 0}
-                className="sm:hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl transition-all flex items-center gap-2 text-xs shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Save PO"
-              >
-                <Save size={15} />
-                {isSaving ? 'Saving...' : 'Save PO'}
-              </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1330,21 +1317,10 @@ export default function CreatePO() {
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
                         <Box size={18} className={activeBoxName.trim() === box.name ? 'text-indigo-500' : 'text-slate-400'} /> {box.name}
                       </h3>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg shadow-sm">
                           {boxPcs} pcs total
                         </span>
-                        {/* Save button directly inside Box header for mobile */}
-                        <button
-                          type="button"
-                          onClick={handleSavePO}
-                          disabled={isSaving || products.length === 0}
-                          className="sm:hidden px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-lg transition-colors flex items-center gap-1 text-[11px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Save PO"
-                        >
-                          <Save size={12} />
-                          {isSaving ? '...' : 'Save'}
-                        </button>
                       </div>
                     </div>
                     {box.items.length === 0 ? (
@@ -1362,6 +1338,20 @@ export default function CreatePO() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Save PO Button DOWN the Box (Mobile Version) */}
+            <div className="pt-2 sm:hidden">
+              <button
+                type="button"
+                onClick={handleSavePO}
+                disabled={isSaving || products.length === 0}
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2.5 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Save PO"
+              >
+                <Save size={20} />
+                {isSaving ? 'Saving PO...' : 'Save PO'}
+              </button>
             </div>
           </div>
 
