@@ -6,7 +6,7 @@ import CreatePO from './pages/CreatePO';
 import POList from './pages/POList';
 import CompanyDashboard from './pages/CompanyDashboard';
 import Products from './pages/Products';
-import { FileText, PlusCircle, LayoutDashboard, ScanLine, QrCode } from 'lucide-react';
+import { FileText, PlusCircle, LayoutDashboard, ScanLine, QrCode, FileSpreadsheet } from 'lucide-react';
 import CameraScanner from './components/CameraScanner';
 import { useState } from 'react';
 
@@ -89,6 +89,20 @@ function Navigation() {
             <QrCode size={24} />
           </div>
           <span className="text-[11px] font-bold text-slate-500">Scan</span>
+        </button>
+
+        <button 
+          onClick={() => {
+            if (path !== '/create') navigate('/create');
+            // Give time for /create to mount if it wasn't mounted
+            setTimeout(() => window.dispatchEvent(new CustomEvent('open-import-modal')), 50);
+          }}
+          className="flex flex-col items-center justify-center w-20 gap-1"
+        >
+          <div className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100">
+            <FileSpreadsheet size={24} />
+          </div>
+          <span className="text-[11px] font-bold text-slate-500">Import</span>
         </button>
 
         <Link 

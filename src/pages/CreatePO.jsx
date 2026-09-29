@@ -446,8 +446,15 @@ export default function CreatePO() {
       const isFull = e.detail?.fullClear === true;
       handleClearForm(isFull);
     };
+    const onOpenImport = () => setIsImportModalOpen(true);
+    
     window.addEventListener('clear-po-form', onClear);
-    return () => window.removeEventListener('clear-po-form', onClear);
+    window.addEventListener('open-import-modal', onOpenImport);
+    
+    return () => {
+      window.removeEventListener('clear-po-form', onClear);
+      window.removeEventListener('open-import-modal', onOpenImport);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
