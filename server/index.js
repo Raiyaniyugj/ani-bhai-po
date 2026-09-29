@@ -174,8 +174,29 @@ app.post('/api/products/bulk', auth, async (req, res) => {
       return res.status(400).json({ message: 'No products provided' });
     }
 
-    const operations = products.map(item => {
-      const barcode = (item.barcode || item.asin || item.modelNumber || `ITEM-${Date.now().toString().slice(-6)}`).trim();
+    // Deduplicate products based on calculated barcode to prevent E11000 errors
+    // when the same product appears multiple times in the Excel sheet
+    const deduplicatedProducts = {};
+    for (const item of products) {
+      let barcode = (item.barcode || item.asin || item.modelNumber || '').trim();
+      if (!barcode) {
+        // Use random string instead of Date.now() to avoid collisions for multiple items
+        barcode = `ITEM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      }
+
+      if (!deduplicatedProducts[barcode]) {
+        deduplicatedProducts[barcode] = { ...item, barcode };
+      } else {
+        deduplicatedProducts[barcode].totalQty = 
+          (parseInt(deduplicatedProducts[barcode].totalQty, 10) || 0) + 
+          (parseInt(item.totalQty, 10) || 0);
+      }
+    }
+
+    const uniqueProducts = Object.values(deduplicatedProducts);
+
+    const operations = uniqueProducts.map(item => {
+      const barcode = item.barcode;
       const asin = (item.asin || '').trim();
       const modelNumber = (item.modelNumber || '').trim();
       const name = (item.name || modelNumber || asin || barcode).trim();
