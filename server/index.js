@@ -91,8 +91,54 @@ app.use(async (req, res, next) => {
 
 // --- API Endpoints ---
 
+// AUTH ROUTES
+app.post('/api/register', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+    
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ error: 'Email already exists' });
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword, name });
+    await user.save();
+    
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    res.status(201).json({ user: { id: user._id, email: user.email, name: user.name }, token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+    
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    res.json({ user: { id: user._id, email: user.email, name: user.name }, token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/auth/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Get Product by barcode, ASIN, or modelNumber
-app.get('/api/products/:barcode', async (req, res) => {
+app.get('/api/products/:barcode', auth, async (req, res) => {
   try {
     const rawCode = (req.params.barcode || '').trim();
     if (!rawCode) return res.status(400).json({ message: 'Barcode is required' });
@@ -101,6 +147,7 @@ app.get('/api/products/:barcode', async (req, res) => {
     const exactRegex = new RegExp(`^${escaped}$`, 'i');
 
     const product = await Product.findOne({
+      user: req.user.id,
       $or: [
         { barcode: rawCode },
         { barcode: { $regex: exactRegex } },
@@ -137,6 +184,7 @@ app.post('/api/products/bulk', auth, async (req, res) => {
       const comp = (companyName || item.companyName || '').trim();
 
       const updateDoc = {
+        user: req.user.id,
         name,
         totalQty,
         price,
@@ -148,6 +196,7 @@ app.post('/api/products/bulk', auth, async (req, res) => {
       return {
         updateOne: {
           filter: {
+            user: req.user.id,
             $or: [
               { barcode },
               ...(asin ? [{ asin }] : []),
@@ -204,7 +253,7 @@ app.post('/api/products', auth, async (req, res) => {
     const { barcode, name, asin, modelNumber, totalQty, price, companyName } = req.body;
     
     // Check if barcode already exists
-    const existing = await Product.findOne({ barcode });
+    const existing = await Product.findOne({ barcode, user: req.user.id });
     if (existing) {
       return res.status(400).json({ message: 'Product with this barcode already exists' });
     }
@@ -227,7 +276,7 @@ app.post('/api/products', auth, async (req, res) => {
 });
 
 // Update Product
-app.put('/api/products/:barcode', async (req, res) => {
+app.put('/api/products/:barcode', auth, async (req, res) => {
   try {
     const oldBarcode = req.params.barcode;
     const { barcode, name, asin, modelNumber, totalQty, companyName } = req.body;
@@ -249,7 +298,7 @@ app.put('/api/products/:barcode', async (req, res) => {
 
     // Update in Product collection
     await Product.findOneAndUpdate(
-      { barcode: oldBarcode },
+      { barcode: oldBarcode, user: req.user.id },
       { $set: updateFields },
       { new: true }
     );
@@ -315,7 +364,7 @@ const getNextBoxNumber = async () => {
 };
 
 // Get next sequential PO number
-app.get('/api/po/next-number', async (req, res) => {
+app.get('/api/po/next-number', auth, async (req, res) => {
   try {
     const nextPoNo = await getNextPoNumber();
     res.json({ nextPoNo });
@@ -325,7 +374,7 @@ app.get('/api/po/next-number', async (req, res) => {
 });
 
 // Create new PO
-app.post('/api/po', async (req, res) => {
+app.post('/api/po', auth, async (req, res) => {
   try {
     const poNo = await getNextPoNumber();
     const boxNo = await getNextBoxNumber();
@@ -351,7 +400,8 @@ app.post('/api/po', async (req, res) => {
       totalPcs,
       totalAmount,
       items,
-      boxes: req.body.boxes || []
+      boxes: req.body.boxes || [],
+      user: req.user.id
     });
 
     const savedPO = await newPO.save();
@@ -373,9 +423,9 @@ app.post('/api/po', async (req, res) => {
 });
 
 // Get all POs - line-wise in ascending order
-app.get('/api/po', async (req, res) => {
+app.get('/api/po', auth, async (req, res) => {
   try {
-    const pos = await PO.find().collation({ locale: 'en', numericOrdering: true }).sort({ poNo: 1 });
+    const pos = await PO.find({ user: req.user.id }).collation({ locale: 'en', numericOrdering: true }).sort({ poNo: 1 });
     res.json(pos);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -383,9 +433,9 @@ app.get('/api/po', async (req, res) => {
 });
 
 // Get single PO
-app.get('/api/po/:id', async (req, res) => {
+app.get('/api/po/:id', auth, async (req, res) => {
   try {
-    const po = await PO.findById(req.params.id);
+    const po = await PO.findOne({ _id: req.params.id, user: req.user.id });
     if (!po) {
       return res.status(404).json({ message: 'PO not found' });
     }
@@ -396,9 +446,9 @@ app.get('/api/po/:id', async (req, res) => {
 });
 
 // Delete PO
-app.delete('/api/po/:id', async (req, res) => {
+app.delete('/api/po/:id', auth, async (req, res) => {
   try {
-    const po = await PO.findByIdAndDelete(req.params.id);
+    const po = await PO.findOneAndDelete({ _id: req.params.id, user: req.user.id });
     if (!po) {
       return res.status(404).json({ message: 'PO not found' });
     }
