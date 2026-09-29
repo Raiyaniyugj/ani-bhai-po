@@ -323,6 +323,20 @@ export default function CreatePO() {
   };
 
   useEffect(() => {
+    const globalCode = sessionStorage.getItem('global_scanned_barcode');
+    if (globalCode) {
+      sessionStorage.removeItem('global_scanned_barcode');
+      setBarcodeInput(globalCode);
+      lookupBarcode(globalCode);
+      // Optional: focus the QTY input or model number input after a slight delay
+      setTimeout(() => {
+        const qtyInput = document.getElementById('qty-to-pack');
+        if (qtyInput) qtyInput.focus();
+      }, 500);
+    }
+  }, []);
+
+  useEffect(() => {
     refreshNextPoNo();
   }, []);
 

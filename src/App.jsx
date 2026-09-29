@@ -3,11 +3,22 @@ import CreatePO from './pages/CreatePO';
 import POList from './pages/POList';
 import CompanyDashboard from './pages/CompanyDashboard';
 import Products from './pages/Products';
-import { FileText, PlusCircle, LayoutDashboard, ScanLine } from 'lucide-react';
+import { FileText, PlusCircle, LayoutDashboard, ScanLine, QrCode } from 'lucide-react';
+import CameraScanner from './components/CameraScanner';
+import { useState } from 'react';
 
 function Navigation() {
   const location = useLocation();
   const path = location.pathname;
+
+  const [isGlobalScannerOpen, setIsGlobalScannerOpen] = useState(false);
+  const navigate = require('react-router-dom').useNavigate(); // We need useNavigate
+
+  const handleGlobalScan = (code) => {
+    setIsGlobalScannerOpen(false);
+    sessionStorage.setItem('global_scanned_barcode', code);
+    navigate('/create');
+  };
 
   return (
     <>
@@ -19,7 +30,14 @@ function Navigation() {
         <Link to="/list" className={`flex items-center gap-2 font-medium transition-colors ${path === '/list' ? 'text-indigo-700' : 'text-slate-600 hover:text-indigo-600'}`}>
           <FileText size={18} /> View POs
         </Link>
-        <Link 
+        
+        <button 
+          onClick={() => setIsGlobalScannerOpen(true)}
+          className="flex items-center gap-2 font-medium transition-colors text-slate-600 hover:text-indigo-600"
+        >
+          <QrCode size={18} /> Scan
+        </button>
+<Link 
           to="/create" 
           onClick={() => {
             localStorage.removeItem('active_po_company');
@@ -50,6 +68,17 @@ function Navigation() {
           <span className={`text-[11px] font-bold ${path === '/list' ? 'text-indigo-700' : 'text-slate-500'}`}>POs</span>
         </Link>
 
+        
+        <button 
+          onClick={() => setIsGlobalScannerOpen(true)}
+          className="flex flex-col items-center justify-center w-20 gap-1"
+        >
+          <div className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100">
+            <QrCode size={24} />
+          </div>
+          <span className="text-[11px] font-bold text-slate-500">Scan</span>
+        </button>
+
         <Link 
           to="/create" 
           onClick={() => {
@@ -67,7 +96,14 @@ function Navigation() {
           <span className={`text-[11px] font-bold ${path === '/create' ? 'text-indigo-700' : 'text-slate-500'}`}>New PO</span>
         </Link>
       </nav>
-    </>
+    
+      {isGlobalScannerOpen && (
+        <CameraScanner 
+          onResult={handleGlobalScan}
+          onClose={() => setIsGlobalScannerOpen(false)}
+        />
+      )}
+      </>
   );
 }
 
