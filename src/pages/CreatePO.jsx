@@ -941,10 +941,11 @@ export default function CreatePO() {
             New PO
           </button>
 
+          {/* Save PO - Visible on desktop, moved next to Box on mobile */}
           <button
             onClick={handleSavePO}
             disabled={isSaving || products.length === 0}
-            className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm shrink-0 text-sm flex-1 sm:flex-none"
+            className="hidden sm:flex px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2 shadow-sm shrink-0 text-sm"
           >
             <Save size={18} />
             {isSaving ? 'Saving...' : 'Save PO'}
@@ -1300,36 +1301,68 @@ export default function CreatePO() {
           </div>
 
           {/* Boxes Summary */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {boxes.map((box, idx) => {
-              const boxPcs = box.items.reduce((acc, i) => acc + (i.pcs || 0), 0);
-              return (
-                <div key={idx} className={`bg-white rounded-xl shadow-sm border p-4 transition-all ${activeBoxName.trim() === box.name ? 'border-indigo-500 ring-1 ring-indigo-500 shadow-md' : 'border-slate-200'}`}>
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                      <Box size={18} className={activeBoxName.trim() === box.name ? 'text-indigo-500' : 'text-slate-400'} /> {box.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg shadow-sm">
-                        {boxPcs} pcs total
-                      </span>
+          <div className="space-y-3">
+            {/* Header for boxes with mobile Save PO button */}
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-bold text-slate-800 flex items-center gap-2 text-base">
+                <Box size={20} className="text-indigo-500" /> Boxes ({boxes.length})
+              </h2>
+
+              {/* Prominent Save PO button next to Box for mobile */}
+              <button
+                type="button"
+                onClick={handleSavePO}
+                disabled={isSaving || products.length === 0}
+                className="sm:hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl transition-all flex items-center gap-2 text-xs shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Save PO"
+              >
+                <Save size={15} />
+                {isSaving ? 'Saving...' : 'Save PO'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {boxes.map((box, idx) => {
+                const boxPcs = box.items.reduce((acc, i) => acc + (i.pcs || 0), 0);
+                return (
+                  <div key={idx} className={`bg-white rounded-xl shadow-sm border p-4 transition-all ${activeBoxName.trim() === box.name ? 'border-indigo-500 ring-1 ring-indigo-500 shadow-md' : 'border-slate-200'}`}>
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                        <Box size={18} className={activeBoxName.trim() === box.name ? 'text-indigo-500' : 'text-slate-400'} /> {box.name}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg shadow-sm">
+                          {boxPcs} pcs total
+                        </span>
+                        {/* Save button directly inside Box header for mobile */}
+                        <button
+                          type="button"
+                          onClick={handleSavePO}
+                          disabled={isSaving || products.length === 0}
+                          className="sm:hidden px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-lg transition-colors flex items-center gap-1 text-[11px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Save PO"
+                        >
+                          <Save size={12} />
+                          {isSaving ? '...' : 'Save'}
+                        </button>
+                      </div>
                     </div>
+                    {box.items.length === 0 ? (
+                      <p className="text-sm text-slate-400 italic py-2 text-center">Empty box</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {box.items.map((item, idx) => (
+                          <li key={idx} className="flex justify-between items-center text-sm">
+                            <span className="text-slate-600 truncate pr-2">{item.name}</span>
+                            <span className="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{item.pcs}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  {box.items.length === 0 ? (
-                    <p className="text-sm text-slate-400 italic py-2 text-center">Empty box</p>
-                  ) : (
-                    <ul className="space-y-2">
-                      {box.items.map((item, idx) => (
-                        <li key={idx} className="flex justify-between items-center text-sm">
-                          <span className="text-slate-600 truncate pr-2">{item.name}</span>
-                          <span className="font-bold text-slate-800 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{item.pcs}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
         </div>
