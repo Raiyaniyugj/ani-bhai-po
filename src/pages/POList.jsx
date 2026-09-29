@@ -16,8 +16,8 @@ const PODetailModal = ({ po, onClose, onDelete, onExportExcel }) => {
   const items = po.items || [];
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto print:absolute print:inset-0 print:bg-transparent print:p-0">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-fade-in print:shadow-none print:border-none print:max-w-none print:max-h-none print:w-full print:overflow-visible">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4 overflow-y-auto print:absolute print:inset-0 print:bg-transparent print:p-0">
+      <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] md:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-fade-in print:shadow-none print:border-none print:max-w-none print:max-h-none print:w-full print:overflow-visible">
         
         {/* Modal Header */}
         <div className="p-6 bg-slate-900 text-white flex justify-between items-start">
@@ -200,6 +200,7 @@ export default function POList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [selectedPO, setSelectedPO] = useState(null); // Active PO for Detail Modal
+  const [activeCompanyFilter, setActiveCompanyFilter] = useState('All');
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   useEffect(() => {
@@ -249,6 +250,9 @@ export default function POList() {
     XLSX.writeFile(workbook, `${po.poNo}_${po.companyName || 'PO'}.xlsx`);
   };
 
+
+  const companies = ['All', ...Array.from(new Set(pos.map(po => po.companyName).filter(Boolean)))];
+
   const filteredPOs = pos.filter((po) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesCompany = (po.companyName || '').toLowerCase().includes(searchLower);
@@ -257,7 +261,9 @@ export default function POList() {
     
     const matchesSearch = matchesCompany || matchesPoNo || matchesBarcode;
     const matchesDate = filterDate ? po.createdAt.startsWith(filterDate) : true;
-    return matchesSearch && matchesDate;
+    const matchesCompanyFilter = activeCompanyFilter === 'All' || po.companyName === activeCompanyFilter;
+    
+    return matchesSearch && matchesDate && matchesCompanyFilter;
   });
 
   // Sort line-wise in ascending order by PO Number (PO-0001, PO-0002, PO-0003...)
@@ -287,77 +293,76 @@ export default function POList() {
         />
       )}
 
-      <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Purchase Orders</h2>
-          <p className="text-slate-500 text-sm mt-1">Manage and view all your purchase orders</p>
-        </div>
-        <Link 
-          to="/create"
-          className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 font-semibold shadow-sm shadow-indigo-600/20"
-        >
-          <Plus size={20} /> Create New PO
-        </Link>
-      </div>
-
-      <div className="p-6 md:p-8 print:hidden">
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="flex-1 relative flex gap-2">
+      <div className="p-4 md:p-8 print:hidden flex flex-col gap-4">
+        {/* Search Input Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-3 md:p-4 flex flex-col gap-3">
+          <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#a0a5b8]" size={20} />
               <input 
                 type="text"
-                placeholder="Search by Company, PO Number, or Barcode..."
+                placeholder="Company, PO number or barcode"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                className="w-full h-[52px] pl-12 pr-4 bg-[#f8f9fc] border-[1.5px] border-[#e4e6f0] rounded-2xl outline-none focus:bg-white focus:border-indigo-700 transition-all text-[#14172b] font-medium"
               />
             </div>
             <button 
               type="button"
-              className="px-4 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center shrink-0"
+              className="w-[52px] h-[52px] bg-[#14172b] text-white rounded-2xl hover:bg-black transition-colors flex items-center justify-center shrink-0"
               onClick={() => setIsScannerOpen(true)}
-              title="Scan Barcode"
             >
-              <ScanLine size={20} />
+              <ScanLine size={24} />
             </button>
           </div>
-          <div className="md:w-64 relative">
-            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <div className="relative">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[#a0a5b8]" size={20} />
             <input 
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+              className="w-full h-[52px] pl-12 pr-4 bg-[#f8f9fc] border-[1.5px] border-[#e4e6f0] rounded-2xl outline-none focus:bg-white focus:border-indigo-700 transition-all text-[#14172b] font-medium"
             />
           </div>
         </div>
 
-        {/* Table */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+        {/* Filter Chips */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {companies.map(company => (
+            <button
+              key={company}
+              onClick={() => setActiveCompanyFilter(company)}
+              className={`whitespace-nowrap px-4 py-2 rounded-full text-[13px] font-bold transition-colors ${activeCompanyFilter === company ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 'bg-white text-[#565b73] border border-[#e4e6f0] hover:bg-[#f4f5fa]'}`}
+            >
+              {company}
+            </button>
+          ))}
+        </div>
+
+        {/* Desktop Table (Hidden on Mobile) */}
+        <div className="hidden md:block border border-[#e4e6f0] rounded-2xl overflow-hidden bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
-                  <th className="p-4 font-semibold w-12 text-center text-slate-400">#</th>
-                  <th className="p-4 font-semibold">PO Number</th>
-                  <th className="p-4 font-semibold">Company</th>
-                  <th className="p-4 font-semibold">Date</th>
-                  <th className="p-4 font-semibold text-center">Total Pcs</th>
-                  <th className="p-4 font-semibold text-center">Actions</th>
+                <tr className="bg-[#f8f9fc] border-b border-[#e4e6f0] text-[#565b73] text-[13px]">
+                  <th className="p-4 font-bold w-12 text-center text-[#a0a5b8]">#</th>
+                  <th className="p-4 font-bold">PO Number</th>
+                  <th className="p-4 font-bold">Company</th>
+                  <th className="p-4 font-bold">Date</th>
+                  <th className="p-4 font-bold text-center">Total Pcs</th>
+                  <th className="p-4 font-bold text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#e4e6f0]">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="p-12 text-center text-slate-400">Loading purchase orders...</td>
+                    <td colSpan="6" className="p-12 text-center text-[#565b73]">Loading purchase orders...</td>
                   </tr>
                 ) : sortedPOs.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="p-12 text-center text-slate-400">
+                    <td colSpan="6" className="p-12 text-center text-[#565b73]">
                       <div className="flex flex-col items-center justify-center gap-3">
-                        <Filter size={48} className="text-slate-200" />
+                        <Filter size={48} className="text-[#e4e6f0]" />
                         <p>No purchase orders found.</p>
                       </div>
                     </td>
@@ -366,15 +371,15 @@ export default function POList() {
                   sortedPOs.map((po, idx) => {
                     const pcs = po.totalPcs || (po.items ? po.items.reduce((acc, i) => acc + (i.qty || 0), 0) : 0);
                     return (
-                      <tr key={po._id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="p-4 text-center font-mono text-xs text-slate-400 font-medium">{idx + 1}</td>
-                        <td className="p-4 text-indigo-600 font-mono font-bold">{po.poNo}</td>
-                        <td className="p-4 font-medium text-slate-800 flex items-center gap-2">
-                          <Building2 size={16} className="text-slate-400" />
+                      <tr key={po._id} className="hover:bg-[#f8f9fc] transition-colors group">
+                        <td className="p-4 text-center font-mono text-xs text-[#a0a5b8] font-medium">{idx + 1}</td>
+                        <td className="p-4 text-indigo-700 font-mono font-bold">{po.poNo}</td>
+                        <td className="p-4 font-medium text-[#14172b] flex items-center gap-2">
+                          <Building2 size={16} className="text-[#a0a5b8]" />
                           {po.companyName}
                         </td>
-                        <td className="p-4 text-slate-600">{new Date(po.createdAt).toLocaleDateString()}</td>
-                        <td className="p-4 text-center font-bold text-indigo-600">
+                        <td className="p-4 text-[#565b73]">{new Date(po.createdAt).toLocaleDateString()}</td>
+                        <td className="p-4 text-center font-bold text-indigo-700">
                           {pcs} pcs
                         </td>
                         <td className="p-4 text-center">
@@ -382,21 +387,21 @@ export default function POList() {
                             <button 
                               onClick={() => setSelectedPO(po)}
                               title="View PO Details"
-                              className="text-indigo-600 hover:text-indigo-800 p-2 rounded-lg transition-colors bg-indigo-50 hover:bg-indigo-100 border border-indigo-100"
+                              className="text-indigo-700 hover:text-indigo-900 p-2 rounded-lg transition-colors bg-indigo-50 hover:bg-indigo-100 border border-indigo-100"
                             >
                               <Eye size={18} />
                             </button>
                             <button 
                               onClick={() => handleExportExcel(po)}
                               title="Export to Excel"
-                              className="text-emerald-600 hover:text-emerald-800 p-2 rounded-lg transition-colors bg-emerald-50 hover:bg-emerald-100 border border-emerald-100"
+                              className="text-emerald-700 hover:text-emerald-900 p-2 rounded-lg transition-colors bg-emerald-50 hover:bg-emerald-100 border border-emerald-100"
                             >
                               <Download size={18} />
                             </button>
                             <button 
                               onClick={() => handleDelete(po._id, po.poNo)}
                               title="Delete Purchase Order"
-                              className="text-rose-600 hover:text-rose-800 p-2 rounded-lg transition-colors bg-rose-50 hover:bg-rose-100 border border-rose-100"
+                              className="text-orange-700 hover:text-orange-900 p-2 rounded-lg transition-colors bg-orange-50 hover:bg-orange-100 border border-orange-100"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -409,6 +414,57 @@ export default function POList() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden flex flex-col gap-3">
+          {loading ? (
+             <div className="p-12 text-center text-[#565b73]">Loading purchase orders...</div>
+          ) : sortedPOs.length === 0 ? (
+             <div className="p-12 text-center text-[#565b73] bg-white rounded-2xl border border-[#e4e6f0]">
+               <div className="flex flex-col items-center justify-center gap-3">
+                 <Filter size={48} className="text-[#e4e6f0]" />
+                 <p className="font-bold">No purchase orders found.</p>
+               </div>
+             </div>
+          ) : (
+            sortedPOs.map((po) => {
+              const pcs = po.totalPcs || (po.items ? po.items.reduce((acc, i) => acc + (i.qty || 0), 0) : 0);
+              const boxesCount = po.boxes ? po.boxes.length : 0;
+              return (
+                <div 
+                  key={po._id}
+                  onClick={() => setSelectedPO(po)}
+                  className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-4 flex items-center justify-between gap-3 active:scale-[0.98] transition-transform"
+                >
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <span className="font-mono font-black text-indigo-700 text-[16px]">{po.poNo}</span>
+                    <span className="font-bold text-[#14172b] text-[15px] truncate">{po.companyName || 'Unnamed Company'}</span>
+                    <span className="text-[12px] text-[#565b73] font-medium">
+                      {new Date(po.createdAt).toLocaleDateString()} &middot; {boxesCount} boxes
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div className="flex flex-col items-end">
+                      <span className="text-[20px] font-black text-[#14172b] leading-none">{pcs}</span>
+                      <span className="text-[10px] font-bold text-[#a0a5b8]">PCS</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.print(); // or handleExportExcel(po) - prompt says print icon button
+                      }}
+                      className="w-[44px] h-[44px] bg-[#f8f9fc] hover:bg-[#e4e6f0] rounded-xl flex items-center justify-center text-[#565b73] transition-colors"
+                      aria-label="Print PO"
+                    >
+                      <Printer size={20} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
       </div>
