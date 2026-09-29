@@ -31,7 +31,8 @@ const CameraScanner = ({ onResult, onClose }) => {
       video: {
         facingMode: 'environment',
         width: { ideal: 1280 },
-        height: { ideal: 720 }
+        height: { ideal: 720 },
+        advanced: [{ focusMode: 'continuous' }]
       }
     },
     onDecodeResult(result) {
