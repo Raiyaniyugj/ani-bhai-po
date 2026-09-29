@@ -1113,10 +1113,10 @@ export default function CreatePO() {
           
           {/* Products Summary (ALWAYS LIVE) */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-              <h2 className="font-bold text-slate-800 flex items-center gap-2">
-                <Package size={20} className="text-indigo-500" /> Overall Order Status
-                <span className="flex items-center gap-1 ml-2 text-emerald-600 text-xs font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+            <div className="p-3 sm:p-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-0">
+              <h2 className="font-bold text-slate-800 flex items-center gap-2 text-[15px] sm:text-base">
+                <Package size={18} className="text-indigo-500" /> Overall Order Status
+                <span className="flex items-center gap-1 ml-1 sm:ml-2 text-emerald-600 text-[10px] sm:text-xs font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
                 </span>
               </h2>
@@ -1147,12 +1147,12 @@ export default function CreatePO() {
             </div>
             
             {/* Mobile Cards (Hidden on Desktop) */}
-            <div className="md:hidden flex flex-col gap-3 p-3 bg-[#f4f5fa]">
+            <div className="md:hidden flex flex-col gap-3 p-2 sm:p-3 bg-[#f4f5fa]">
               {products.length === 0 && !isDraftNewItem ? (
-                <div className="bg-white rounded-2xl p-6 text-center text-[#565b73] border border-[#e4e6f0] shadow-sm flex flex-col items-center gap-3">
-                  <Package size={48} className="text-[#a0a5b8]" />
-                  <p className="font-bold text-[#14172b]">No products in this order yet.</p>
-                  <p className="text-[13px]">
+                <div className="bg-white rounded-2xl p-4 sm:p-6 text-center text-[#565b73] border border-[#e4e6f0] shadow-sm flex flex-col items-center gap-2 sm:gap-3">
+                  <Package size={36} className="text-[#a0a5b8]" />
+                  <p className="font-bold text-[#14172b] text-[15px]">No products in this order yet.</p>
+                  <p className="text-[12px] sm:text-[13px]">
                     Scan a barcode, add a product, or <button type="button" onClick={() => setIsImportModalOpen(true)} className="text-indigo-700 font-bold underline">Import Excel</button>
                   </p>
                 </div>
