@@ -4,7 +4,19 @@ import axios from 'axios';
 const AuthContext = createContext();
 
 // Setup axios defaults
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const getApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+    return '/api';
+  }
+  return '/api';
+};
+const API_URL = getApiUrl();
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
