@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/po_app';
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || (process.env.VERCEL ? '' : 'mongodb://localhost:27017/po_app');
 
 // Serverless-friendly cached MongoDB connection
 let cached = global.mongoose;
@@ -22,6 +22,9 @@ if (!cached) {
 async function connectDB() {
   if (cached.conn) {
     return cached.conn;
+  }
+  if (!MONGO_URI) {
+    throw new Error('MONGO_URI or MONGODB_URI is not set in Vercel Project Environment Variables. Please provide a MongoDB Atlas connection string.');
   }
   if (!cached.promise) {
     const opts = {
