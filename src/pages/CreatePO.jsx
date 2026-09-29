@@ -780,7 +780,8 @@ export default function CreatePO() {
   const draftBarcode = barcodeInput.trim();
   const isDraftNewItem = draftBarcode && !products.some(p => p.barcode.toLowerCase() === draftBarcode.toLowerCase());
 
-  // Sum of total quantity across all products (including draft item if being added)
+  // Products count and sum of total quantity across all products (including draft item if being added)
+  const totalProductsCount = products.length + (isDraftNewItem ? 1 : 0);
   const sumTotalQty = products.reduce((sum, p) => sum + (p.totalQty || 0), 0) + (isDraftNewItem ? totalValue : 0);
   const totalPackedPcs = products.reduce((sum, p) => sum + (p.packedQty || 0), 0);
 
@@ -895,19 +896,31 @@ export default function CreatePO() {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto justify-between xl:justify-end flex-wrap">
-          {/* Sequential Ascending PO Number Badge */}
-          <div className="bg-indigo-50 px-5 py-3 rounded-xl border border-indigo-100 flex flex-col items-center min-w-[130px]">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-0.5">PO Number</span>
-            <span className="text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
-          </div>
+          {/* Stat Badges: PO Number, Total Products & Total Quantity */}
+          <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {/* Sequential Ascending PO Number Badge */}
+            <div className="bg-indigo-50 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-indigo-100 flex flex-col items-center flex-1 sm:flex-none min-w-0 sm:min-w-[120px]">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-0.5 truncate">PO Number</span>
+              <span className="text-base sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
+            </div>
 
-          {/* Total Quantity Badge */}
-          <div className="bg-slate-50 px-5 py-3 rounded-xl border border-slate-200 flex flex-col items-center min-w-[130px]">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-0.5">Total Quantity</span>
-            <span className="text-2xl font-extrabold text-slate-800">{sumTotalQty}</span>
-            <span className="text-[11px] text-slate-500 font-medium mt-0.5">
-              Packed: <b className="text-indigo-600">{totalPackedPcs}</b> pcs
-            </span>
+            {/* Total Products Badge */}
+            <div className="bg-purple-50 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-purple-100 flex flex-col items-center flex-1 sm:flex-none min-w-0 sm:min-w-[120px]">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-purple-700 mb-0.5 truncate">Products</span>
+              <span className="text-base sm:text-2xl font-black font-mono text-purple-900">{totalProductsCount}</span>
+              <span className="text-[9px] sm:text-[11px] text-purple-600 font-medium mt-0.5 truncate">
+                {totalProductsCount === 1 ? '1 item' : `${totalProductsCount} items`}
+              </span>
+            </div>
+
+            {/* Total Quantity Badge */}
+            <div className="bg-slate-50 px-2 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-slate-200 flex flex-col items-center flex-1 sm:flex-none min-w-0 sm:min-w-[120px]">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-0.5 truncate">Total Qty</span>
+              <span className="text-base sm:text-2xl font-extrabold text-slate-800">{sumTotalQty}</span>
+              <span className="text-[9px] sm:text-[11px] text-slate-500 font-medium mt-0.5 truncate">
+                Packed: <b className="text-indigo-600">{totalPackedPcs}</b>
+              </span>
+            </div>
           </div>
 
 
