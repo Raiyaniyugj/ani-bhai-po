@@ -920,7 +920,7 @@ export default function CreatePO() {
           {/* Total Quantity Badge */}
           <div className="bg-white px-4 py-3 rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center flex-1 min-w-0 shadow-sm">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Total Qty</span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">{Math.max(0, sumTotalQty - totalPackedPcs)}</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">{Math.max(0, (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) - totalPackedPcs)}</span>
             <span className="text-[11px] text-[#565b73] font-medium mt-0.5 truncate">
               Packed: <b className="text-indigo-700">{totalPackedPcs} pcs</b>
             </span>
