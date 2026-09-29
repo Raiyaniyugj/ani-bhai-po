@@ -383,9 +383,17 @@ export default function CreatePO() {
     }
   }, [importedFileMeta]);
 
-  const handleClearForm = () => {
+  const handleClearForm = (fullClear = false) => {
     sessionStorage.removeItem('force_blank_po');
-    setCompanyName('');
+    
+    if (fullClear) {
+      setCompanyName('');
+      setImportedFileMeta(null);
+      localStorage.removeItem('active_po_company');
+      localStorage.removeItem('active_po_imported_meta');
+      loadedCompanyRef.current = '';
+    }
+
     setProducts([]);
     setBoxes([{ name: 'Box 1', items: [] }]);
     setActiveBoxName('Box 1');
@@ -394,12 +402,8 @@ export default function CreatePO() {
     setRemainingInput('');
     setPcsInput('');
     setActiveProduct(null);
-    setImportedFileMeta(null);
-    loadedCompanyRef.current = '';
-    localStorage.removeItem('active_po_company');
     localStorage.removeItem('active_po_products');
     localStorage.removeItem('active_po_boxes');
-    localStorage.removeItem('active_po_imported_meta');
     refreshNextPoNo();
   };
 
@@ -439,7 +443,10 @@ export default function CreatePO() {
     };
     fetchInitialData();
 
-    const onClear = () => handleClearForm();
+    const onClear = (e) => {
+      const isFull = e.detail?.fullClear === true;
+      handleClearForm(isFull);
+    };
     window.addEventListener('clear-po-form', onClear);
     return () => window.removeEventListener('clear-po-form', onClear);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -721,7 +728,7 @@ export default function CreatePO() {
 
       setSaveSuccessMsg(`Purchase Order (${savedPO.poNo}) created and saved!`);
       setTimeout(() => setSaveSuccessMsg(''), 6000);
-      handleClearForm();
+      handleClearForm(false); // Retain imported master sheet and company
     } catch (err) {
       console.error(err);
       alert('Failed to save PO. ' + (err.response?.data?.message || err.message));
@@ -739,9 +746,9 @@ export default function CreatePO() {
         alert('Please enter a Company Name to save the current PO before starting a new one.');
         return;
       }
-      await handleSavePO();
+      await handleSavePO(); // Automatically retains sheet data
     } else {
-      handleClearForm();
+      handleClearForm(false); // Just clear the empty product list
     }
   };
 
@@ -749,7 +756,7 @@ export default function CreatePO() {
     if (!window.confirm("Are you sure you want to clear all products and start a completely blank order?")) {
       return;
     }
-    handleClearForm();
+    handleClearForm(true); // Explicitly clear everything, including imported sheet
   };
 
   const handleSaveProductEdit = (barcode, updatedData) => {

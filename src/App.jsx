@@ -53,11 +53,10 @@ function Navigation() {
 <Link 
           to="/create" 
           onClick={() => {
-            localStorage.removeItem('active_po_company');
             localStorage.removeItem('active_po_products');
             localStorage.removeItem('active_po_boxes');
             sessionStorage.setItem('force_blank_po', 'true');
-            window.dispatchEvent(new CustomEvent('clear-po-form'));
+            window.dispatchEvent(new CustomEvent('clear-po-form', { detail: { fullClear: false } }));
           }}
           className={`flex items-center gap-2 font-medium transition-colors ${path === '/create' ? 'text-indigo-700' : 'text-slate-600 hover:text-indigo-600'}`}
         >
@@ -95,11 +94,10 @@ function Navigation() {
         <Link 
           to="/create" 
           onClick={() => {
-            localStorage.removeItem('active_po_company');
             localStorage.removeItem('active_po_products');
             localStorage.removeItem('active_po_boxes');
             sessionStorage.setItem('force_blank_po', 'true');
-            window.dispatchEvent(new CustomEvent('clear-po-form'));
+            window.dispatchEvent(new CustomEvent('clear-po-form', { detail: { fullClear: false } }));
           }}
           className="flex flex-col items-center justify-center w-20 gap-1"
         >
