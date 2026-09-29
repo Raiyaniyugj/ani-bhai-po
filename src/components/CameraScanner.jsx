@@ -26,6 +26,14 @@ const CameraScanner = ({ onResult, onClose }) => {
   
   const { ref } = useZxing({
     hints,
+    timeBetweenDecodingAttempts: 150,
+    constraints: {
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    },
     onDecodeResult(result) {
       onResult(result.rawValue || (result.getText && result.getText()) || result.text);
     },
