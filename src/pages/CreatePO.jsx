@@ -932,17 +932,10 @@ export default function CreatePO() {
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
-            className="h-[52px] flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
+            className="h-[52px] w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
           >
             <FileSpreadsheet size={20} className="text-emerald-700" />
             Import Excel
-          </button>
-          <button
-            onClick={handleStartNewPO}
-            className="h-[52px] flex-1 bg-slate-100 hover:bg-slate-200 text-[#14172b] font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
-          >
-            <PlusCircle size={20} className="text-[#565b73]" />
-            New PO
           </button>
         </div>
       </div>
@@ -1429,13 +1422,22 @@ export default function CreatePO() {
               })}
             </div>
 
-            {/* Save PO Button DOWN the Box (Mobile Version) */}
-            <div className="pt-2 sm:hidden">
+            {/* Save & New PO Buttons DOWN the Box */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={handleStartNewPO}
+                className="w-full sm:flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2.5 text-base"
+                title="Start New PO"
+              >
+                <PlusCircle size={20} />
+                New PO
+              </button>
               <button
                 type="button"
                 onClick={handleSavePO}
                 disabled={isSaving || products.length === 0}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2.5 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:flex-[2] py-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2.5 text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Save PO"
               >
                 <Save size={20} />
@@ -1447,11 +1449,18 @@ export default function CreatePO() {
         </div>
       
       {/* Mobile Fixed Save PO Bar */}
-      <div className="md:hidden fixed bottom-[76px] left-0 right-0 p-3 bg-white border-t border-[#e4e6f0] z-40">
+      <div className="md:hidden fixed bottom-[76px] left-0 right-0 p-3 bg-white border-t border-[#e4e6f0] z-40 flex gap-3">
+        <button
+          onClick={handleStartNewPO}
+          className="h-[52px] px-5 bg-slate-100 hover:bg-slate-200 text-[#14172b] font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 shrink-0"
+        >
+          <PlusCircle size={20} className="text-[#565b73]" />
+          New PO
+        </button>
         <button
           onClick={handleSavePO}
           disabled={isSaving || products.length === 0}
-          className="w-full h-[52px] bg-emerald-700 hover:bg-emerald-800 disabled:bg-[#e4e6f0] disabled:text-[#a0a5b8] text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
+          className="h-[52px] flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-[#e4e6f0] disabled:text-[#a0a5b8] text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
         >
           <Save size={20} />
           {isSaving ? 'Saving...' : (products.length > 0 ? `Save PO · ${Math.max(0, sumTotalQty - totalPackedPcs)} pcs` : 'Save PO')}
