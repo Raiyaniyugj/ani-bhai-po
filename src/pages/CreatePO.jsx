@@ -949,17 +949,6 @@ export default function CreatePO() {
           </div>
         </div>
 
-        {/* 3. Action row */}
-        <div className="flex items-center gap-3 w-full">
-          <button
-            type="button"
-            onClick={() => setIsImportModalOpen(true)}
-            className="h-[52px] w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
-          >
-            <FileSpreadsheet size={20} className="text-emerald-700" />
-            Import Excel
-          </button>
-        </div>
       </div>
 
 
