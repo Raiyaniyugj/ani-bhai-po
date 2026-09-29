@@ -30,7 +30,7 @@ function Navigation() {
           }}
           className={`flex items-center gap-2 font-medium transition-colors ${path === '/create' ? 'text-indigo-700' : 'text-slate-600 hover:text-indigo-600'}`}
         >
-          <ScanLine size={18} /> New PO
+          <PlusCircle size={18} /> New PO
         </Link>
       </nav>
 
@@ -62,7 +62,7 @@ function Navigation() {
           className="flex flex-col items-center justify-center w-20 gap-1"
         >
           <div className={`p-1.5 rounded-full ${path === '/create' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500'}`}>
-            <ScanLine size={24} />
+            <PlusCircle size={24} />
           </div>
           <span className={`text-[11px] font-bold ${path === '/create' ? 'text-indigo-700' : 'text-slate-500'}`}>New PO</span>
         </Link>
