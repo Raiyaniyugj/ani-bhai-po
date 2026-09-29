@@ -1,0 +1,362 @@
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+const PO = require('./models/PO');
+const Product = require('./models/Product');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/po_app';
+
+// Connect to MongoDB
+mongoose.connect(MONGO_URI)
+  .then(async () => {
+    console.log('Connected to MongoDB');
+    // Seed initial products if empty
+    const count = await Product.countDocuments();
+    if (count === 0) {
+      await Product.insertMany([
+        { barcode: '123456789', name: 'Premium Wireless Headphones', price: 199.99 },
+        { barcode: '987654321', name: 'Ergonomic Office Chair', price: 249.50 },
+        { barcode: '111222333', name: 'Mechanical Keyboard RGB', price: 129.00 },
+        { barcode: '444555666', name: '4K Ultra HD Monitor', price: 349.99 },
+      ]);
+      console.log('Seeded database with mock products');
+    }
+  })
+  .catch(err => {
+    console.error('Failed to connect to MongoDB. Make sure MongoDB is running locally or MONGO_URI is set.');
+    console.error(err);
+  });
+
+// --- API Endpoints ---
+
+// Get Product by barcode, ASIN, or modelNumber
+app.get('/api/products/:barcode', async (req, res) => {
+  try {
+    const rawCode = (req.params.barcode || '').trim();
+    if (!rawCode) return res.status(400).json({ message: 'Barcode is required' });
+
+    const escaped = rawCode.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    const exactRegex = new RegExp(`^${escaped}$`, 'i');
+
+    const product = await Product.findOne({
+      $or: [
+        { barcode: rawCode },
+        { barcode: { $regex: exactRegex } },
+        { asin: { $regex: exactRegex } },
+        { modelNumber: { $regex: exactRegex } },
+        { name: { $regex: exactRegex } }
+      ]
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Bulk upsert products (from Excel import)
+app.post('/api/products/bulk', async (req, res) => {
+  try {
+    const { products, companyName } = req.body;
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ message: 'No products provided' });
+    }
+
+    const operations = products.map(item => {
+      const barcode = (item.barcode || item.asin || item.modelNumber || `ITEM-${Date.now().toString().slice(-6)}`).trim();
+      const asin = (item.asin || '').trim();
+      const modelNumber = (item.modelNumber || '').trim();
+      const name = (item.name || modelNumber || asin || barcode).trim();
+      const totalQty = parseInt(item.totalQty, 10) || 0;
+      const price = parseFloat(item.price) || 0;
+      const comp = (companyName || item.companyName || '').trim();
+
+      const updateDoc = {
+        name,
+        totalQty,
+        price,
+        companyName: comp
+      };
+      if (asin) updateDoc.asin = asin;
+      if (modelNumber) updateDoc.modelNumber = modelNumber;
+
+      return {
+        updateOne: {
+          filter: {
+            $or: [
+              { barcode },
+              ...(asin ? [{ asin }] : []),
+              ...(modelNumber ? [{ modelNumber }] : [])
+            ]
+          },
+          update: {
+            $set: updateDoc,
+            $setOnInsert: { barcode }
+          },
+          upsert: true
+        }
+      };
+    });
+
+    const bulkResult = await Product.bulkWrite(operations);
+
+    // Return the updated products
+    const identifiers = products.map(p => (p.barcode || p.asin || p.modelNumber || '').trim()).filter(Boolean);
+    const savedProducts = await Product.find({
+      $or: [
+        { barcode: { $in: identifiers } },
+        { asin: { $in: identifiers } },
+        { modelNumber: { $in: identifiers } }
+      ]
+    });
+
+    res.json({
+      success: true,
+      message: `Successfully processed ${products.length} products`,
+      upsertedCount: bulkResult.upsertedCount,
+      modifiedCount: bulkResult.modifiedCount,
+      products: savedProducts
+    });
+  } catch (err) {
+    console.error('Bulk Import Error:', err);
+    res.status(500).json({ message: 'Failed to import products', error: err.message });
+  }
+});
+
+// Get all Products
+app.get('/api/products', async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add new Product
+app.post('/api/products', async (req, res) => {
+  try {
+    const { barcode, name, asin, modelNumber, totalQty, price, companyName } = req.body;
+    
+    // Check if barcode already exists
+    const existing = await Product.findOne({ barcode });
+    if (existing) {
+      return res.status(400).json({ message: 'Product with this barcode already exists' });
+    }
+
+    const newProduct = new Product({
+      barcode: barcode || `ITEM-${Date.now().toString().slice(-6)}`,
+      name: name || modelNumber || asin || 'New Product',
+      asin: asin || '',
+      modelNumber: modelNumber || '',
+      totalQty: totalQty || 0,
+      price: price || 0,
+      companyName: companyName || ''
+    });
+
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Update Product
+app.put('/api/products/:barcode', async (req, res) => {
+  try {
+    const oldBarcode = req.params.barcode;
+    const { barcode, name, asin, modelNumber, totalQty, companyName } = req.body;
+    
+    // Check if new barcode already exists
+    if (barcode && barcode !== oldBarcode) {
+      const existing = await Product.findOne({ barcode });
+      if (existing) {
+        return res.status(400).json({ message: 'Product with this new barcode already exists' });
+      }
+    }
+
+    const updateFields = { barcode: barcode || oldBarcode };
+    if (name) updateFields.name = name;
+    if (asin !== undefined) updateFields.asin = asin;
+    if (modelNumber !== undefined) updateFields.modelNumber = modelNumber;
+    if (totalQty !== undefined) updateFields.totalQty = totalQty;
+    if (companyName !== undefined) updateFields.companyName = companyName;
+
+    // Update in Product collection
+    await Product.findOneAndUpdate(
+      { barcode: oldBarcode },
+      { $set: updateFields },
+      { new: true }
+    );
+    
+    // Update in PO items
+    if (name || barcode) {
+      const setObj = {};
+      if (barcode) setObj["items.$[elem].barcode"] = barcode;
+      if (name) setObj["items.$[elem].name"] = name;
+
+      await PO.updateMany(
+        { "items.barcode": oldBarcode },
+        { $set: setObj },
+        { arrayFilters: [ { "elem.barcode": oldBarcode } ] }
+      );
+    }
+
+    res.json({ success: true, message: 'Product updated' });
+  } catch (err) {
+    console.error('Update Product Error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Helper for sequential ascending PO Number (PO-0001, PO-0002, PO-0003...)
+const getNextPoNumber = async () => {
+  const allPOs = await PO.find({}, { poNo: 1 });
+  let maxSeq = 0;
+  for (const p of allPOs) {
+    const m = (p.poNo || '').match(/^PO-(\d+)$/i);
+    if (m) {
+      const val = parseInt(m[1], 10);
+      if (!isNaN(val) && val < 100000 && val > maxSeq) {
+        maxSeq = val;
+      }
+    }
+  }
+  let nextNum = maxSeq + 1;
+  while (await PO.exists({ poNo: `PO-${nextNum}` })) {
+    nextNum++;
+  }
+  return `PO-${nextNum}`;
+};
+
+// Helper for sequential ascending Box Number (BOX-0001, BOX-0002...)
+const getNextBoxNumber = async () => {
+  const allPOs = await PO.find({}, { boxNo: 1 });
+  let maxSeq = 0;
+  for (const p of allPOs) {
+    const m = (p.boxNo || '').match(/^BOX-(\d+)$/i);
+    if (m) {
+      const val = parseInt(m[1], 10);
+      if (!isNaN(val) && val < 100000 && val > maxSeq) {
+        maxSeq = val;
+      }
+    }
+  }
+  let nextNum = maxSeq + 1;
+  while (await PO.exists({ boxNo: `BOX-${nextNum}` })) {
+    nextNum++;
+  }
+  return `BOX-${nextNum}`;
+};
+
+// Get next sequential PO number
+app.get('/api/po/next-number', async (req, res) => {
+  try {
+    const nextPoNo = await getNextPoNumber();
+    res.json({ nextPoNo });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Create new PO
+app.post('/api/po', async (req, res) => {
+  try {
+    const poNo = await getNextPoNumber();
+    const boxNo = await getNextBoxNumber();
+
+    const rawItems = req.body.items || [];
+    const items = rawItems.map(item => ({
+      barcode: item.barcode || 'N/A',
+      name: item.name || 'Product',
+      asin: item.asin || '',
+      modelNumber: item.modelNumber || '',
+      totalQty: item.totalQty || 0,
+      qty: item.qty || 0,
+      price: item.price || 0
+    }));
+
+    const totalPcs = req.body.totalPcs || items.reduce((sum, i) => sum + i.qty, 0);
+    const totalAmount = req.body.totalAmount || items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+
+    const newPO = new PO({
+      ...req.body,
+      poNo,
+      boxNo,
+      totalPcs,
+      totalAmount,
+      items,
+      boxes: req.body.boxes || []
+    });
+
+    const savedPO = await newPO.save();
+
+    // Update packedQty for each product
+    for (const item of items) {
+      if (item.barcode && item.barcode !== 'N/A') {
+        await Product.updateOne(
+          { barcode: item.barcode },
+          { $inc: { packedQty: item.qty } }
+        );
+      }
+    }
+    res.status(201).json(savedPO);
+  } catch (err) {
+    console.error('PO Creation Error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Get all POs - line-wise in ascending order
+app.get('/api/po', async (req, res) => {
+  try {
+    const pos = await PO.find().collation({ locale: 'en', numericOrdering: true }).sort({ poNo: 1 });
+    res.json(pos);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get single PO
+app.get('/api/po/:id', async (req, res) => {
+  try {
+    const po = await PO.findById(req.params.id);
+    if (!po) {
+      return res.status(404).json({ message: 'PO not found' });
+    }
+    res.json(po);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete PO
+app.delete('/api/po/:id', async (req, res) => {
+  try {
+    const po = await PO.findByIdAndDelete(req.params.id);
+    if (!po) {
+      return res.status(404).json({ message: 'PO not found' });
+    }
+    res.json({ message: 'PO deleted successfully', id: req.params.id });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
