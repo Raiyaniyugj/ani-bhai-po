@@ -163,8 +163,8 @@ function App() {
           </div>
         </header>
 
-        {/* Add bottom padding pb-24 for the mobile tab bar (76px + safe area) */}
-        <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-8">
+        {/* Add bottom padding pb-40 for the mobile tab bar + floating action bars */}
+        <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-40 md:pb-8">
           <Routes>
             <Route path="/" element={<Navigate to="/create" replace />} />
             <Route path="/login" element={<AuthPage />} />
