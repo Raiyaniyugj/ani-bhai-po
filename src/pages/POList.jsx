@@ -266,9 +266,9 @@ export default function POList() {
     return matchesSearch && matchesDate && matchesCompanyFilter;
   });
 
-  // Sort line-wise in ascending order by PO Number (PO-0001, PO-0002, PO-0003...)
+  // Sort line-wise in descending order by PO Number (latest first)
   const sortedPOs = [...filteredPOs].sort((a, b) => {
-    return (a.poNo || '').localeCompare(b.poNo || '', undefined, { numeric: true, sensitivity: 'base' });
+    return (b.poNo || '').localeCompare(a.poNo || '', undefined, { numeric: true, sensitivity: 'base' });
   });
 
   return (
