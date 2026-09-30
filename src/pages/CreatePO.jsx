@@ -422,6 +422,9 @@ export default function CreatePO() {
 
   // Called when Excel file is imported and saved
   const handleImportSuccess = ({ rawItems, companyName: importedCompany, fileName, totalQtySum, products: savedProducts }) => {
+    // Clear out any existing packing progress to start fresh for this new import
+    handleClearForm(false);
+    
     if (importedCompany && !companyName) {
       setCompanyName(importedCompany);
     }
