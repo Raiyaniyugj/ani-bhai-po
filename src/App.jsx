@@ -43,6 +43,15 @@ function Navigation() {
         <Link to="/list" className={`flex items-center gap-2 font-medium transition-colors ${path === '/list' ? 'text-indigo-700' : 'text-slate-600 hover:text-indigo-600'}`}>
           <FileText size={18} /> View POs
         </Link>
+        <button
+          onClick={() => {
+            if (path !== '/create') navigate('/create');
+            setTimeout(() => window.dispatchEvent(new CustomEvent('open-camera-scanner')), 50);
+          }}
+          className="flex items-center gap-2 font-medium transition-colors text-slate-600 hover:text-indigo-600"
+        >
+          <QrCode size={18} /> Scan
+        </button>
 
 
         <Link
@@ -74,6 +83,19 @@ function Navigation() {
           </div>
           <span className={`text-[11px] font-bold ${path === '/list' ? 'text-indigo-700' : 'text-slate-500'}`}>POs</span>
         </Link>
+
+        <button
+          onClick={() => {
+            if (path !== '/create') navigate('/create');
+            setTimeout(() => window.dispatchEvent(new CustomEvent('open-camera-scanner')), 50);
+          }}
+          className="flex flex-col items-center justify-center w-20 gap-1"
+        >
+          <div className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100">
+            <QrCode size={24} />
+          </div>
+          <span className="text-[11px] font-bold text-slate-500">Scan</span>
+        </button>
 
 
         <button
