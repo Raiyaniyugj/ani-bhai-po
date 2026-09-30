@@ -1447,7 +1447,7 @@ export default function CreatePO() {
                 title="Save PO"
               >
                 <Save size={20} />
-                {isSaving ? 'Saving PO...' : 'Save PO'}
+                {isSaving ? 'Saving PO...' : (products.length > 0 ? `Save PO · ${totalPackedPcs} pcs` : 'Save PO')}
               </button>
             </div>
           </div>
@@ -1469,7 +1469,7 @@ export default function CreatePO() {
             className="h-[52px] flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-[#e4e6f0] disabled:text-[#a0a5b8] text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
           >
             <Save size={20} />
-            {isSaving ? 'Saving...' : (products.length > 0 ? `Save PO · ${Math.max(0, sumTotalQty - totalPackedPcs)} pcs` : 'Save PO')}
+            {isSaving ? 'Saving...' : (products.length > 0 ? `Save PO · ${totalPackedPcs} pcs` : 'Save PO')}
           </button>
         </div>
       </div>
