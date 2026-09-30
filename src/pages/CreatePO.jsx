@@ -432,7 +432,8 @@ export default function CreatePO() {
     setImportedFileMeta({
       fileName,
       count: rawItems.length,
-      totalQty: totalQtySum
+      totalQty: totalQtySum,
+      packedQty: 0
     });
 
     setSaveSuccessMsg(`Excel Imported: ${rawItems.length} products loaded from ${fileName} (${totalQtySum} total requested pcs)`);
@@ -750,6 +751,14 @@ export default function CreatePO() {
 
       setSaveSuccessMsg(`Purchase Order (${savedPO.poNo}) created and saved!`);
       setTimeout(() => setSaveSuccessMsg(''), 6000);
+      
+      if (importedFileMeta) {
+        setImportedFileMeta(prev => ({
+          ...prev,
+          packedQty: (prev.packedQty || 0) + (currentPoPcs > 0 ? currentPoPcs : totalPackedPcs)
+        }));
+      }
+
       handleClearForm(false); // Retain imported master sheet and company
     } catch (err) {
       console.error(err);
@@ -961,7 +970,11 @@ export default function CreatePO() {
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Remaining / Total</span>
             <div className="flex items-baseline gap-1">
               <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">
-                {Math.max(0, (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) - totalHistoricalPacked - totalPackedPcs)}
+                {Math.max(0, 
+                  (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) 
+                  - (importedFileMeta ? (importedFileMeta.packedQty || 0) : totalHistoricalPacked) 
+                  - totalPackedPcs
+                )}
               </span>
               <span className="text-sm font-bold text-slate-400">
                 / {importedFileMeta ? importedFileMeta.totalQty : sumTotalQty}
