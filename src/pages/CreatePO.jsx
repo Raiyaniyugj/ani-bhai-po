@@ -824,6 +824,7 @@ export default function CreatePO() {
   const totalProductsCount = products.length + (isDraftNewItem ? 1 : 0);
   const sumTotalQty = products.reduce((sum, p) => sum + (p.totalQty || 0), 0) + (isDraftNewItem ? totalValue : 0);
   const totalPackedPcs = products.reduce((sum, p) => sum + (p.packedQty || 0), 0);
+  const totalHistoricalPacked = products.reduce((sum, p) => sum + (p.historicalPacked || 0), 0);
 
   const filterCode = barcodeInput.trim().toLowerCase();
   const displayedProducts = filterCode
@@ -957,7 +958,7 @@ export default function CreatePO() {
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Remaining / Total</span>
             <div className="flex items-baseline gap-1">
               <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">
-                {Math.max(0, (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) - totalPackedPcs)}
+                {Math.max(0, (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) - totalHistoricalPacked - totalPackedPcs)}
               </span>
               <span className="text-sm font-bold text-slate-400">
                 / {importedFileMeta ? importedFileMeta.totalQty : sumTotalQty}
