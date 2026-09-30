@@ -39,17 +39,17 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
         <form onSubmit={handleSave} className="p-6 space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-600">Barcode</label>
-            <input 
-              value={product.barcode} 
-              disabled 
+            <input
+              value={product.barcode}
+              disabled
               className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl font-mono text-slate-500 cursor-not-allowed"
             />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-600">ASIN</label>
-            <input 
-              value={name} 
+            <input
+              value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-800"
               placeholder="Enter ASIN..."
@@ -60,7 +60,7 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-600">Total Quantity</label>
-              <input 
+              <input
                 type="number"
                 min={product.packedQty}
                 value={totalQty}
@@ -72,9 +72,9 @@ const EditProductModal = ({ product, onClose, onSave, onDelete }) => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-600">Packed Pcs</label>
-              <input 
-                value={product.packedQty} 
-                disabled 
+              <input
+                value={product.packedQty}
+                disabled
                 className="w-full px-4 py-2.5 bg-indigo-50 border border-indigo-100 rounded-xl font-bold text-indigo-700 cursor-not-allowed"
               />
             </div>
@@ -137,9 +137,9 @@ const AddProductModal = ({ onClose, onSave, activeCompanyName }) => {
     }
     try {
       setIsSubmitting(true);
-      const newProduct = await createProduct({ 
-        barcode: barcode.trim(), 
-        name: name.trim(), 
+      const newProduct = await createProduct({
+        barcode: barcode.trim(),
+        name: name.trim(),
         totalQty: parsedTotal,
         companyName: companyName.trim()
       });
@@ -161,99 +161,99 @@ const AddProductModal = ({ onClose, onSave, activeCompanyName }) => {
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4">
-      <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl max-w-md w-full overflow-y-auto max-h-[85vh] md:max-h-none border border-slate-200 animate-fade-in">
-        <div className="p-5 bg-slate-900 text-white flex justify-between items-center">
-          <h3 className="font-bold flex items-center gap-2">
-            <PlusCircle size={18} className="text-emerald-400" /> Add New Product
-          </h3>
-          <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors">
-            <X size={20} />
-          </button>
-        </div>
+        <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl max-w-md w-full overflow-y-auto max-h-[85vh] md:max-h-none border border-slate-200 animate-fade-in">
+          <div className="p-5 bg-slate-900 text-white flex justify-between items-center">
+            <h3 className="font-bold flex items-center gap-2">
+              <PlusCircle size={18} className="text-emerald-400" /> Add New Product
+            </h3>
+            <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors">
+              <X size={20} />
+            </button>
+          </div>
 
-        <form onSubmit={handleSave} className="p-6 space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">Barcode</label>
-            <div className="flex gap-2">
-              <input 
-                value={barcode} 
-                onChange={(e) => setBarcode(e.target.value)}
-                className="flex-1 w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-slate-800"
-                placeholder="Scan or type barcode..."
+          <form onSubmit={handleSave} className="p-6 space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">Barcode</label>
+              <div className="flex gap-2">
+                <input
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  className="flex-1 w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-slate-800"
+                  placeholder="Scan or type barcode..."
+                  required
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="px-3 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center shrink-0"
+                  onClick={() => setIsScannerOpen(true)}
+                  title="Scan Barcode"
+                >
+                  <ScanLine size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">ASIN</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800"
+                placeholder="Enter ASIN..."
                 required
-                autoFocus
               />
-              <button 
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">Company Name (Optional)</label>
+              <input
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800"
+                placeholder="Assign to specific company..."
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">Total Quantity</label>
+              <input
+                type="number"
+                min="1"
+                value={totalQty}
+                onChange={(e) => setTotalQty(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-800"
+                required
+                placeholder="Initial inventory..."
+              />
+            </div>
+
+            <div className="pt-2 flex justify-end items-center gap-2">
+              <button
                 type="button"
-                className="px-3 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center shrink-0"
-                onClick={() => setIsScannerOpen(true)}
-                title="Scan Barcode"
+                onClick={onClose}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
               >
-                <ScanLine size={18} />
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
+              >
+                <Check size={16} /> {isSubmitting ? 'Adding...' : 'Add Product'}
               </button>
             </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">ASIN</label>
-            <input 
-              value={name} 
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800"
-              placeholder="Enter ASIN..."
-              required
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">Company Name (Optional)</label>
-            <input 
-              value={companyName} 
-              onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800"
-              placeholder="Assign to specific company..."
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">Total Quantity</label>
-            <input 
-              type="number"
-              min="1"
-              value={totalQty}
-              onChange={(e) => setTotalQty(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-800"
-              required
-              placeholder="Initial inventory..."
-            />
-          </div>
-
-          <div className="pt-2 flex justify-end items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
-            >
-              <Check size={16} /> {isSubmitting ? 'Adding...' : 'Add Product'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
       {isScannerOpen && (
-        <CameraScanner 
+        <CameraScanner
           onResult={(code) => {
             setBarcode(code);
             setIsScannerOpen(false);
-          }} 
-          onClose={() => setIsScannerOpen(false)} 
+          }}
+          onClose={() => setIsScannerOpen(false)}
         />
       )}
     </>
@@ -265,7 +265,7 @@ export default function CreatePO() {
   const [companyName, setCompanyName] = useState(() => {
     return localStorage.getItem('active_po_company') || '';
   });
-  
+
   // App state
   const [products, setProducts] = useState(() => {
     try {
@@ -286,7 +286,7 @@ export default function CreatePO() {
   });
 
   const [activeBoxName, setActiveBoxName] = useState('Box 1');
-  
+
   // Form input states
   const [barcodeInput, setBarcodeInput] = useState('');
   const [productNameInput, setProductNameInput] = useState('');
@@ -354,7 +354,7 @@ export default function CreatePO() {
       "Packed": p.packedQty,
       "Remaining": Math.max(0, p.totalQty - (p.historicalPacked || 0) - p.packedQty)
     }));
-    
+
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Current Order");
@@ -385,7 +385,7 @@ export default function CreatePO() {
 
   const handleClearForm = (fullClear = false) => {
     sessionStorage.removeItem('force_blank_po');
-    
+
     if (fullClear) {
       setCompanyName('');
       setImportedFileMeta(null);
@@ -412,7 +412,7 @@ export default function CreatePO() {
     if (importedCompany && !companyName) {
       setCompanyName(importedCompany);
     }
-    
+
     setImportedFileMeta({
       fileName,
       count: rawItems.length,
@@ -429,7 +429,7 @@ export default function CreatePO() {
       try {
         const pos = await getPOs();
         if (!pos) return;
-        
+
         const companies = [...new Set(pos.map(p => p.companyName).filter(Boolean))];
         setAvailableCompanies(companies);
 
@@ -447,10 +447,10 @@ export default function CreatePO() {
       handleClearForm(isFull);
     };
     const onOpenImport = () => setIsImportModalOpen(true);
-    
+
     window.addEventListener('clear-po-form', onClear);
     window.addEventListener('open-import-modal', onOpenImport);
-    
+
     return () => {
       window.removeEventListener('clear-po-form', onClear);
       window.removeEventListener('open-import-modal', onOpenImport);
@@ -461,7 +461,7 @@ export default function CreatePO() {
   // Company watcher removed: New POs should start completely blank.
 
   const packItem = (code, name, pcs, parsedRemain = NaN) => {
-    const existing = productsRef.current.find(p => 
+    const existing = productsRef.current.find(p =>
       (p.barcode && p.barcode.toLowerCase() === code.toLowerCase()) ||
       (p.asin && p.asin.toLowerCase() === code.toLowerCase()) ||
       (p.modelNumber && p.modelNumber.toLowerCase() === code.toLowerCase()) ||
@@ -469,7 +469,7 @@ export default function CreatePO() {
     );
     const canonicalBarcode = existing ? existing.barcode : code;
     const currentPacked = existing ? existing.packedQty : 0;
-    
+
     let actualRemaining = isNaN(parsedRemain) ? pcs : parsedRemain;
     if (existing) {
       actualRemaining = existing.totalQty - (existing.historicalPacked || 0) - existing.packedQty;
@@ -495,14 +495,14 @@ export default function CreatePO() {
 
     // Update products list
     if (existing) {
-      setProducts(prev => prev.map(p => 
-        p.barcode === canonicalBarcode 
-          ? { 
-              ...p, 
-              name: name || p.name, 
-              totalQty: newTotal, 
-              packedQty: newPacked 
-            }
+      setProducts(prev => prev.map(p =>
+        p.barcode === canonicalBarcode
+          ? {
+            ...p,
+            name: name || p.name,
+            totalQty: newTotal,
+            packedQty: newPacked
+          }
           : p
       ));
     } else {
@@ -551,14 +551,14 @@ export default function CreatePO() {
   };
 
   // Lookup barcode function (used for typing, pressing Enter, or camera scan)
-  const lookupBarcode = async (codeToLookup) => {
+  const lookupBarcode = async (codeToLookup, shouldFocus = false) => {
     const code = (codeToLookup || '').trim();
     if (!code) return;
 
     let foundProduct = null;
 
     // 1. Check local products list first with latest products ref (checking barcode, asin, modelNumber, or name)
-    const localMatch = productsRef.current.find(p => 
+    const localMatch = productsRef.current.find(p =>
       (p.barcode && p.barcode.toLowerCase() === code.toLowerCase()) ||
       (p.asin && p.asin.toLowerCase() === code.toLowerCase()) ||
       (p.modelNumber && p.modelNumber.toLowerCase() === code.toLowerCase()) ||
@@ -607,7 +607,7 @@ export default function CreatePO() {
     setProductNameInput(foundProduct.name || foundProduct.modelNumber || foundProduct.asin || code);
     const rem = Math.max(0, foundProduct.totalQty - (foundProduct.historicalPacked || 0) - foundProduct.packedQty);
     setRemainingInput(rem > 0 ? rem.toString() : (foundProduct.totalQty > 0 ? foundProduct.totalQty.toString() : ''));
-    if (pcsInputRef.current) pcsInputRef.current.focus();
+    if (shouldFocus && pcsInputRef.current) pcsInputRef.current.focus();
   };
 
   // Instant barcode change check + debounced network lookup
@@ -620,7 +620,7 @@ export default function CreatePO() {
       return;
     }
     // Instantly check local products without waiting
-    const localMatch = productsRef.current.find(p => 
+    const localMatch = productsRef.current.find(p =>
       (p.barcode && p.barcode.toLowerCase() === code.toLowerCase()) ||
       (p.asin && p.asin.toLowerCase() === code.toLowerCase()) ||
       (p.modelNumber && p.modelNumber.toLowerCase() === code.toLowerCase()) ||
@@ -655,7 +655,7 @@ export default function CreatePO() {
     if (activeProduct) {
       const newTotal = newRemain + activeProduct.packedQty;
       setActiveProduct(prev => prev ? { ...prev, totalQty: newTotal } : null);
-      setProducts(prev => prev.map(p => 
+      setProducts(prev => prev.map(p =>
         p.barcode === activeProduct.barcode ? { ...p, totalQty: newTotal } : p
       ));
     }
@@ -667,7 +667,7 @@ export default function CreatePO() {
     setProductNameInput(val);
     if (activeProduct) {
       setActiveProduct(prev => prev ? { ...prev, name: val } : null);
-      setProducts(prev => prev.map(p => 
+      setProducts(prev => prev.map(p =>
         p.barcode === activeProduct.barcode ? { ...p, name: val } : p
       ));
     }
@@ -680,7 +680,7 @@ export default function CreatePO() {
   // Pack items into box and update table
   const handleAdd = (e) => {
     if (e) e.preventDefault();
-    
+
     if (!companyName.trim()) {
       alert("Please enter or select a Company Name before packing items.");
       return;
@@ -696,7 +696,7 @@ export default function CreatePO() {
     const code = barcodeInput.trim() || `ITEM-${Date.now().toString().slice(-4)}`;
     const name = productNameInput.trim() || code;
     const parsedRemain = parseInt(remainingInput, 10);
-    
+
     packItem(code, name, pcs, parsedRemain);
   };
 
@@ -713,20 +713,20 @@ export default function CreatePO() {
     try {
       setIsSaving(true);
       const currentPoBoxes = boxes;
-      const currentPoPcs = currentPoBoxes.reduce((sum, b) => 
+      const currentPoPcs = currentPoBoxes.reduce((sum, b) =>
         sum + (b.items ? b.items.reduce((s, i) => s + (i.pcs || 0), 0) : 0), 0
       );
 
       const savedPO = await createPO({
         companyName,
         totalPcs: currentPoPcs > 0 ? currentPoPcs : totalPackedPcs,
-        items: products.filter(p => p.packedQty > 0).map(p => ({ 
-          barcode: p.barcode, 
-          name: p.name, 
+        items: products.filter(p => p.packedQty > 0).map(p => ({
+          barcode: p.barcode,
+          name: p.name,
           companyName: p.companyName,
-          totalQty: p.totalQty, 
+          totalQty: p.totalQty,
           qty: p.packedQty,
-          price: 0 
+          price: 0
         })),
         boxes: currentPoBoxes,
         totalAmount: 0
@@ -766,9 +766,9 @@ export default function CreatePO() {
   };
 
   const handleSaveProductEdit = (barcode, updatedData) => {
-    setProducts(prev => prev.map(p => 
-      p.barcode === barcode 
-        ? { ...p, ...updatedData } 
+    setProducts(prev => prev.map(p =>
+      p.barcode === barcode
+        ? { ...p, ...updatedData }
         : p
     ));
 
@@ -799,7 +799,7 @@ export default function CreatePO() {
 
   const totalValue = activeProduct ? activeProduct.totalQty : (parseInt(remainingInput, 10) || 0);
   const packedValue = activeProduct ? activeProduct.packedQty : 0;
-  const currentRemaining = activeProduct 
+  const currentRemaining = activeProduct
     ? Math.max(0, activeProduct.totalQty - (activeProduct.historicalPacked || 0) - activeProduct.packedQty)
     : (parseInt(remainingInput, 10) || 0);
 
@@ -814,12 +814,12 @@ export default function CreatePO() {
 
   const filterCode = barcodeInput.trim().toLowerCase();
   const displayedProducts = filterCode
-    ? products.filter(p => 
-        (p.barcode && p.barcode.toLowerCase().includes(filterCode)) ||
-        (p.asin && p.asin.toLowerCase().includes(filterCode)) ||
-        (p.modelNumber && p.modelNumber.toLowerCase().includes(filterCode)) ||
-        (p.name && p.name.toLowerCase().includes(filterCode))
-      )
+    ? products.filter(p =>
+      (p.barcode && p.barcode.toLowerCase().includes(filterCode)) ||
+      (p.asin && p.asin.toLowerCase().includes(filterCode)) ||
+      (p.modelNumber && p.modelNumber.toLowerCase().includes(filterCode)) ||
+      (p.name && p.name.toLowerCase().includes(filterCode))
+    )
     : products;
 
   return (
@@ -835,14 +835,14 @@ export default function CreatePO() {
 
       {/* Add Product Modal */}
       {isAddProductModalOpen && (
-        <AddProductModal 
+        <AddProductModal
           activeCompanyName={companyName}
-          onClose={() => setIsAddProductModalOpen(false)} 
+          onClose={() => setIsAddProductModalOpen(false)}
           onSave={(prod) => {
             // Check if already in list, if not add it
             if (!products.some(p => p.barcode === prod.barcode)) {
               setProducts(prev => [...prev, prod]);
-              
+
               // Push to imported file database tracking as well
               if (importedFileMeta) {
                 setImportedFileMeta(prev => ({
@@ -858,28 +858,28 @@ export default function CreatePO() {
             setRemainingInput(prod.totalQty.toString());
             setSaveSuccessMsg(`Product ${prod.name} added successfully!`);
             setTimeout(() => setSaveSuccessMsg(''), 3000);
-          }} 
+          }}
         />
       )}
 
       {/* Edit Product Modal */}
       {editingProduct && (
-        <EditProductModal 
-          product={editingProduct} 
-          onClose={() => setEditingProduct(null)} 
-          onSave={handleSaveProductEdit} 
-          onDelete={handleDeleteProduct} 
+        <EditProductModal
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
+          onSave={handleSaveProductEdit}
+          onDelete={handleDeleteProduct}
         />
       )}
 
       {isCameraOpen && (
-        <CameraScanner 
+        <CameraScanner
           onResult={(code) => {
             setBarcodeInput(code);
             setIsCameraOpen(false);
-            lookupBarcode(code);
-          }} 
-          onClose={() => setIsCameraOpen(false)} 
+            lookupBarcode(code, true);
+          }}
+          onClose={() => setIsCameraOpen(false)}
         />
       )}
 
@@ -890,8 +890,8 @@ export default function CreatePO() {
             <CheckCircle2 className="text-emerald-600" size={20} />
             <span>{saveSuccessMsg}</span>
           </div>
-          <button 
-            onClick={() => setSaveSuccessMsg('')} 
+          <button
+            onClick={() => setSaveSuccessMsg('')}
             className="text-emerald-600 hover:text-emerald-800 p-1"
           >
             <X size={16} />
@@ -907,18 +907,18 @@ export default function CreatePO() {
             <label className="text-[12px] font-bold text-[#565b73] flex items-center gap-2 uppercase tracking-wider">
               <Building2 size={20} className="text-indigo-700" /> Company Name
             </label>
-            <button 
-              type="button" 
-              onClick={() => { 
-                setCompanyName(''); 
-                setTimeout(() => document.getElementById('company-input')?.focus(), 10); 
-              }} 
+            <button
+              type="button"
+              onClick={() => {
+                setCompanyName('');
+                setTimeout(() => document.getElementById('company-input')?.focus(), 10);
+              }}
               className="text-[12px] font-bold text-indigo-700 bg-indigo-100 px-3 py-1.5 rounded-full flex items-center gap-1"
             >
               <PlusCircle size={14} /> Add New
             </button>
           </div>
-          <input 
+          <input
             id="company-input"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
@@ -930,7 +930,7 @@ export default function CreatePO() {
             {availableCompanies.map(c => <option key={c} value={c} />)}
           </datalist>
         </div>
-        
+
         {/* 2. Two tiles side by side: PO NUMBER and TOTAL QUANTITY */}
         <div className="flex items-center gap-3 w-full">
           {/* PO Number Badge */}
@@ -954,10 +954,10 @@ export default function CreatePO() {
 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Left Column: Scanner and Boxes */}
         <div className="lg:col-span-1 space-y-6">
-          
+
           {/* Scanner Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 sm:p-4 space-y-3">
             <div className="flex justify-between items-center">
@@ -968,19 +968,19 @@ export default function CreatePO() {
                 Scan or Manual
               </span>
             </div>
-            
+
             <form onSubmit={handleAdd} className="space-y-3">
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-slate-600">Barcode</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <input 
+                    <input
                       value={barcodeInput}
                       onChange={handleBarcodeChange}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          lookupBarcode(barcodeInput);
+                          lookupBarcode(barcodeInput, true);
                         }
                       }}
                       className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono text-sm"
@@ -989,7 +989,7 @@ export default function CreatePO() {
                     />
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
-                  <button 
+                  <button
                     type="button"
                     className="px-3 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 font-medium shrink-0"
                     onClick={() => setIsCameraOpen(true)}
@@ -1003,7 +1003,7 @@ export default function CreatePO() {
               {/* Model Number */}
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-slate-600">Model Number</label>
-                <input 
+                <input
                   type="text"
                   value={productNameInput}
                   onChange={handleProductNameChange}
@@ -1046,7 +1046,7 @@ export default function CreatePO() {
                       </span>
                     )}
                   </div>
-                  <input 
+                  <input
                     type="number"
                     min="0"
                     value={remainingInput}
@@ -1064,7 +1064,7 @@ export default function CreatePO() {
                       </span>
                     )}
                   </div>
-                  <input 
+                  <input
                     ref={pcsInputRef}
                     type="number"
                     min="1"
@@ -1078,7 +1078,7 @@ export default function CreatePO() {
 
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-slate-600">Target Box</label>
-                <input 
+                <input
                   list="box-options"
                   value={activeBoxName}
                   onChange={handleBoxChange}
@@ -1092,7 +1092,7 @@ export default function CreatePO() {
                 </datalist>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={!pcsInput || parseInt(pcsInput, 10) <= 0}
                 className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 shadow-sm text-sm"
@@ -1106,7 +1106,7 @@ export default function CreatePO() {
 
         {/* Right Column: Tables */}
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* Products Summary (ALWAYS LIVE) */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-3 sm:p-5 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-0">
@@ -1141,7 +1141,7 @@ export default function CreatePO() {
                 )}
               </div>
             </div>
-            
+
             {/* Mobile Cards (Hidden on Desktop) */}
             <div className="md:hidden flex flex-col gap-3 p-2 sm:p-3 bg-[#f4f5fa]">
               {products.length === 0 && !isDraftNewItem ? (
@@ -1185,7 +1185,7 @@ export default function CreatePO() {
                     const remain = p.totalQty - (p.historicalPacked || 0) - p.packedQty;
                     const isRowActive = activeProduct && (activeProduct.barcode === p.barcode || (p.asin && activeProduct.asin === p.asin));
                     return (
-                      <div 
+                      <div
                         key={p.barcode}
                         onClick={() => {
                           setActiveProduct(p);
@@ -1236,7 +1236,7 @@ export default function CreatePO() {
                 </>
               )}
             </div>
-<div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider bg-white">
@@ -1299,8 +1299,8 @@ export default function CreatePO() {
                       const remain = p.totalQty - (p.historicalPacked || 0) - p.packedQty;
                       const isRowActive = activeProduct && (activeProduct.barcode === p.barcode || (p.asin && activeProduct.asin === p.asin));
                       return (
-                        <tr 
-                          key={p.barcode} 
+                        <tr
+                          key={p.barcode}
                           onClick={() => {
                             setActiveProduct(p);
                             setBarcodeInput(p.barcode);
@@ -1440,26 +1440,26 @@ export default function CreatePO() {
           </div>
 
         </div>
-      
-      {/* Mobile Fixed Save PO Bar */}
-      <div className="md:hidden fixed bottom-[76px] left-0 right-0 p-3 bg-white border-t border-[#e4e6f0] z-40 flex gap-3">
-        <button
-          onClick={handleStartNewPO}
-          className="h-[52px] px-5 bg-slate-100 hover:bg-slate-200 text-[#14172b] font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 shrink-0"
-        >
-          <PlusCircle size={20} className="text-[#565b73]" />
-          New PO
-        </button>
-        <button
-          onClick={handleSavePO}
-          disabled={isSaving || products.length === 0}
-          className="h-[52px] flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-[#e4e6f0] disabled:text-[#a0a5b8] text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
-        >
-          <Save size={20} />
-          {isSaving ? 'Saving...' : (products.length > 0 ? `Save PO · ${Math.max(0, sumTotalQty - totalPackedPcs)} pcs` : 'Save PO')}
-        </button>
+
+        {/* Mobile Fixed Save PO Bar */}
+        <div className="md:hidden fixed bottom-[76px] left-0 right-0 p-3 bg-white border-t border-[#e4e6f0] z-40 flex gap-3">
+          <button
+            onClick={handleStartNewPO}
+            className="h-[52px] px-5 bg-slate-100 hover:bg-slate-200 text-[#14172b] font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 shrink-0"
+          >
+            <PlusCircle size={20} className="text-[#565b73]" />
+            New PO
+          </button>
+          <button
+            onClick={handleSavePO}
+            disabled={isSaving || products.length === 0}
+            className="h-[52px] flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-[#e4e6f0] disabled:text-[#a0a5b8] text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
+          >
+            <Save size={20} />
+            {isSaving ? 'Saving...' : (products.length > 0 ? `Save PO · ${Math.max(0, sumTotalQty - totalPackedPcs)} pcs` : 'Save PO')}
+          </button>
+        </div>
       </div>
-  </div>
     </div>
   );
 }

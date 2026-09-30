@@ -43,15 +43,10 @@ function Navigation() {
         <Link to="/list" className={`flex items-center gap-2 font-medium transition-colors ${path === '/list' ? 'text-indigo-700' : 'text-slate-600 hover:text-indigo-600'}`}>
           <FileText size={18} /> View POs
         </Link>
-        
-        <button 
-          onClick={() => setIsGlobalScannerOpen(true)}
-          className="flex items-center gap-2 font-medium transition-colors text-slate-600 hover:text-indigo-600"
-        >
-          <QrCode size={18} /> Scan
-        </button>
-<Link 
-          to="/create" 
+
+
+        <Link
+          to="/create"
           onClick={() => {
             localStorage.removeItem('active_po_products');
             localStorage.removeItem('active_po_boxes');
@@ -72,7 +67,7 @@ function Navigation() {
           </div>
           <span className={`text-[11px] font-bold ${path === '/dashboard' ? 'text-indigo-700' : 'text-slate-500'}`}>Overview</span>
         </Link>
-        
+
         <Link to="/list" className="flex flex-col items-center justify-center w-20 gap-1">
           <div className={`p-1.5 rounded-full ${path === '/list' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500'}`}>
             <FileText size={24} />
@@ -80,18 +75,8 @@ function Navigation() {
           <span className={`text-[11px] font-bold ${path === '/list' ? 'text-indigo-700' : 'text-slate-500'}`}>POs</span>
         </Link>
 
-        
-        <button 
-          onClick={() => setIsGlobalScannerOpen(true)}
-          className="flex flex-col items-center justify-center w-20 gap-1"
-        >
-          <div className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100">
-            <QrCode size={24} />
-          </div>
-          <span className="text-[11px] font-bold text-slate-500">Scan</span>
-        </button>
 
-        <button 
+        <button
           onClick={() => {
             if (path !== '/create') navigate('/create');
             // Give time for /create to mount if it wasn't mounted
@@ -105,8 +90,8 @@ function Navigation() {
           <span className="text-[11px] font-bold text-slate-500">Import</span>
         </button>
 
-        <Link 
-          to="/create" 
+        <Link
+          to="/create"
           onClick={() => {
             localStorage.removeItem('active_po_products');
             localStorage.removeItem('active_po_boxes');
@@ -121,14 +106,14 @@ function Navigation() {
           <span className={`text-[11px] font-bold ${path === '/create' ? 'text-indigo-700' : 'text-slate-500'}`}>New PO</span>
         </Link>
       </nav>
-    
+
       {isGlobalScannerOpen && (
-        <CameraScanner 
+        <CameraScanner
           onResult={handleGlobalScan}
           onClose={() => setIsGlobalScannerOpen(false)}
         />
       )}
-      </>
+    </>
   );
 }
 
@@ -163,31 +148,31 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="min-h-screen bg-[#f4f5fa] text-[#14172b] font-jakarta">
-        <header className="bg-white shadow-sm border-b border-[#e4e6f0]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16 items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">
-                  P
+          <header className="bg-white shadow-sm border-b border-[#e4e6f0]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between h-16 items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+                    P
+                  </div>
+                  <h1 className="text-xl font-bold text-slate-800 tracking-tight">PO System</h1>
                 </div>
-                <h1 className="text-xl font-bold text-slate-800 tracking-tight">PO System</h1>
+                <Navigation />
               </div>
-              <Navigation />
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Add bottom padding pb-40 for the mobile tab bar + floating action bars */}
-        <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-40 md:pb-8">
-          <Routes>
-            <Route path="/" element={<Navigate to="/create" replace />} />
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/create" element={<ProtectedRoute><CreatePO /></ProtectedRoute>} />
-            <Route path="/list" element={<ProtectedRoute><POList /></ProtectedRoute>} />
-            <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
-          </Routes>
-        </main>
+          {/* Add bottom padding pb-40 for the mobile tab bar + floating action bars */}
+          <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-40 md:pb-8">
+            <Routes>
+              <Route path="/" element={<Navigate to="/create" replace />} />
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/create" element={<ProtectedRoute><CreatePO /></ProtectedRoute>} />
+              <Route path="/list" element={<ProtectedRoute><POList /></ProtectedRoute>} />
+              <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
+            </Routes>
+          </main>
         </div>
       </AuthProvider>
     </Router>
