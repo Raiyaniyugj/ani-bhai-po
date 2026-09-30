@@ -45,8 +45,12 @@ function Navigation() {
         </Link>
         <button
           onClick={() => {
-            if (path !== '/create') navigate('/create');
-            setTimeout(() => window.dispatchEvent(new CustomEvent('open-camera-scanner')), 50);
+            if (path !== '/create') {
+              sessionStorage.setItem('auto_open_scanner', 'true');
+              navigate('/create');
+            } else {
+              window.dispatchEvent(new CustomEvent('open-camera-scanner'));
+            }
           }}
           className="flex items-center gap-2 font-medium transition-colors text-slate-600 hover:text-indigo-600"
         >
@@ -86,8 +90,12 @@ function Navigation() {
 
         <button
           onClick={() => {
-            if (path !== '/create') navigate('/create');
-            setTimeout(() => window.dispatchEvent(new CustomEvent('open-camera-scanner')), 50);
+            if (path !== '/create') {
+              sessionStorage.setItem('auto_open_scanner', 'true');
+              navigate('/create');
+            } else {
+              window.dispatchEvent(new CustomEvent('open-camera-scanner'));
+            }
           }}
           className="flex flex-col items-center justify-center w-20 gap-1"
         >

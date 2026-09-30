@@ -313,6 +313,19 @@ export default function CreatePO() {
   const pcsInputRef = useRef(null);
   const productsRef = useRef(products);
 
+  useEffect(() => {
+    // Check if we need to auto-open scanner (coming from another page)
+    if (sessionStorage.getItem('auto_open_scanner') === 'true') {
+      setIsCameraOpen(true);
+      sessionStorage.removeItem('auto_open_scanner');
+    }
+
+    // Listen for events if we're already on this page
+    const handleOpenScanner = () => setIsCameraOpen(true);
+    window.addEventListener('open-camera-scanner', handleOpenScanner);
+    return () => window.removeEventListener('open-camera-scanner', handleOpenScanner);
+  }, []);
+
   const refreshNextPoNo = async () => {
     try {
       const num = await getNextPoNumber();
