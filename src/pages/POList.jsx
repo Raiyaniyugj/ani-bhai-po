@@ -84,8 +84,8 @@ const PODetailModal = ({ po, onClose, onDelete, onExportExcel }) => {
             <h3 className="font-bold text-slate-800 flex items-center gap-2 text-base">
               <Package size={18} className="text-indigo-600" /> Products in this Order
             </h3>
-            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-              <table className="w-full text-left border-collapse text-sm">
+            <div className="border border-slate-200 rounded-xl bg-white shadow-sm overflow-x-auto">
+              <table className="w-full min-w-[500px] text-left border-collapse text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase font-semibold">
                     <th className="p-3">Model Number</th>
