@@ -95,28 +95,7 @@ const CameraScanner = ({ onResult, onClose }) => {
         <div className="p-4 flex flex-col gap-3 text-center text-sm text-slate-500">
           <p>Point your camera at a barcode to scan it automatically.</p>
           
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-slate-400 uppercase font-semibold">Or</span>
-            </div>
-          </div>
 
-          <input 
-            type="file" 
-            accept="image/*" 
-            className="hidden" 
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-          />
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl font-medium transition-colors"
-          >
-            <Upload size={16} /> Scan from Image
-          </button>
         </div>
       </div>
     </div>

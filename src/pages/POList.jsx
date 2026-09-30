@@ -449,17 +449,7 @@ export default function POList() {
                       <span className="text-[20px] font-black text-[#14172b] leading-none">{pcs}</span>
                       <span className="text-[10px] font-bold text-[#a0a5b8]">PCS</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.print(); // or handleExportExcel(po) - prompt says print icon button
-                      }}
-                      className="w-[44px] h-[44px] bg-[#f8f9fc] hover:bg-[#e4e6f0] rounded-xl flex items-center justify-center text-[#565b73] transition-colors"
-                      aria-label="Print PO"
-                    >
-                      <Printer size={20} />
-                    </button>
+
                   </div>
                 </div>
               );

@@ -281,6 +281,7 @@ app.post('/api/products', auth, async (req, res) => {
 
     const newProduct = new Product({
       barcode: barcode || `ITEM-${Date.now().toString().slice(-6)}`,
+      user: req.user.id,
       name: name || modelNumber || asin || 'New Product',
       asin: asin || '',
       modelNumber: modelNumber || '',
