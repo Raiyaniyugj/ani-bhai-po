@@ -619,7 +619,7 @@ export default function CreatePO() {
     setBarcodeInput(foundProduct.barcode || code);
     setProductNameInput(foundProduct.name || foundProduct.modelNumber || foundProduct.asin || code);
     const rem = Math.max(0, foundProduct.totalQty - (foundProduct.historicalPacked || 0) - foundProduct.packedQty);
-    setRemainingInput(rem > 0 ? rem.toString() : (foundProduct.totalQty > 0 ? foundProduct.totalQty.toString() : ''));
+    setRemainingInput(rem > 0 || foundProduct.totalQty > 0 ? rem.toString() : '');
     if (shouldFocus && pcsInputRef.current) pcsInputRef.current.focus();
   };
 
