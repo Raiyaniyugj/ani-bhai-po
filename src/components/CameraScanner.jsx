@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useZxing } from 'react-zxing';
 import { BarcodeFormat, DecodeHintType, BrowserMultiFormatReader } from '@zxing/library';
 import { ScanLine, X, Upload, AlertCircle } from 'lucide-react';
@@ -24,6 +24,14 @@ const CameraScanner = ({ onResult, onClose }) => {
   const fileInputRef = useRef(null);
   const [errorMsg, setErrorMsg] = useState('');
   
+  useEffect(() => {
+    return () => {
+      if (ref.current && ref.current.srcObject) {
+        ref.current.srcObject.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
   const { ref } = useZxing({
     hints,
     timeBetweenDecodingAttempts: 150,
