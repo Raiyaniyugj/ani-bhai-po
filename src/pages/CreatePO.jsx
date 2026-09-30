@@ -952,10 +952,17 @@ export default function CreatePO() {
             <span className="text-xl sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
           </div>
 
-          {/* Total Quantity Badge */}
+          {/* Quantity Badge */}
           <div className="bg-white px-4 py-3 rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center flex-1 min-w-0 shadow-sm">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Total Qty</span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">{Math.max(0, (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) - totalPackedPcs)}</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Remaining / Total</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">
+                {Math.max(0, (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) - totalPackedPcs)}
+              </span>
+              <span className="text-sm font-bold text-slate-400">
+                / {importedFileMeta ? importedFileMeta.totalQty : sumTotalQty}
+              </span>
+            </div>
             <span className="text-[11px] text-[#565b73] font-medium mt-0.5 truncate">
               Packed: <b className="text-indigo-700">{totalPackedPcs} pcs</b>
             </span>
