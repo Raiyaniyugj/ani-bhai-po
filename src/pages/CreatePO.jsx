@@ -476,14 +476,6 @@ export default function CreatePO() {
           }
         });
 
-        let boxOutput = itemBoxes.join(', ');
-        if (!boxOutput) {
-          boxOutput = `Debug: dbBarcode=${dbBarcode} | pCount=${currentProducts.length} | bCount=${currentBoxes.length} | lpCode=${lpCode}`;
-          if (currentBoxes.length > 0 && currentBoxes[0].items && currentBoxes[0].items.length > 0) {
-            boxOutput += ` | bItemCode=${currentBoxes[0].items[0].barcode}`;
-          }
-        }
-
         return {
           "#": idx + 1,
           "Model Number": localProd?.name || dbProd.name || dbProd.modelNumber || dbProd.asin || dbProd.barcode,
@@ -492,7 +484,7 @@ export default function CreatePO() {
           "Total Qty": totalQty,
           "Packed": packedQty,
           "Remaining": Math.max(0, totalQty - historicalPacked - packedQty),
-          "Boxes": boxOutput
+          "Boxes": itemBoxes.join(', ')
         };
       });
 
