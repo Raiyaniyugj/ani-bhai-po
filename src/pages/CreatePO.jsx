@@ -378,13 +378,18 @@ export default function CreatePO() {
       const exportList = [...companyProducts];
       if (products) {
         products.forEach(p => {
-          const pCode = (p.barcode || '').toLowerCase();
-          const exists = companyProducts.some(cp => 
-            (cp.barcode || '').toLowerCase() === pCode ||
-            (cp.asin || '').toLowerCase() === pCode ||
-            (cp.modelNumber || '').toLowerCase() === pCode ||
-            (cp.name || '').toLowerCase() === pCode
-          );
+          const pCode = String(p.barcode || '').trim().toLowerCase();
+          if (!pCode) return;
+          const exists = companyProducts.some(cp => {
+            const dbBarcode = String(cp.barcode || '').trim().toLowerCase();
+            const dbAsin = String(cp.asin || '').trim().toLowerCase();
+            const dbModel = String(cp.modelNumber || '').trim().toLowerCase();
+            const dbName = String(cp.name || '').trim().toLowerCase();
+            return (dbBarcode && dbBarcode === pCode) ||
+                   (dbAsin && dbAsin === pCode) ||
+                   (dbModel && dbModel === pCode) ||
+                   (dbName && dbName === pCode);
+          });
           if (!exists) {
             exportList.push(p);
           }
@@ -392,14 +397,22 @@ export default function CreatePO() {
       }
 
       const excelData = exportList.map((dbProd, idx) => {
+        const dbBarcode = String(dbProd.barcode || '').trim().toLowerCase();
+        const dbAsin = String(dbProd.asin || '').trim().toLowerCase();
+        const dbModel = String(dbProd.modelNumber || '').trim().toLowerCase();
+        const dbName = String(dbProd.name || '').trim().toLowerCase();
+
         // Robust matching to find if this item was packed locally
         const localProd = (products || []).find(p => {
-          const pCode = (p.barcode || '').toLowerCase();
-          return pCode === (dbProd.barcode || '').toLowerCase() || 
-                 pCode === (dbProd.asin || '').toLowerCase() || 
-                 pCode === (dbProd.modelNumber || '').toLowerCase() ||
-                 pCode === (dbProd.name || '').toLowerCase();
+          const pCode = String(p.barcode || '').trim().toLowerCase();
+          if (!pCode) return false;
+          return (dbBarcode && pCode === dbBarcode) || 
+                 (dbAsin && pCode === dbAsin) || 
+                 (dbModel && pCode === dbModel) ||
+                 (dbName && pCode === dbName);
         }) || (dbProd.packedQty !== undefined ? dbProd : null); // If dbProd IS the localProd (appended)
+
+        const lpCode = localProd ? String(localProd.barcode || '').trim().toLowerCase() : '';
 
         // Quantities
         const totalQty = localProd ? localProd.totalQty : (dbProd.totalQty || 0);
@@ -411,12 +424,13 @@ export default function CreatePO() {
         if (boxes) {
           boxes.forEach(box => {
             const boxItem = (box.items || []).find(bi => {
-              const biCode = (bi.barcode || '').toLowerCase();
-              return biCode === (dbProd.barcode || '').toLowerCase() || 
-                     biCode === (dbProd.asin || '').toLowerCase() || 
-                     biCode === (dbProd.modelNumber || '').toLowerCase() ||
-                     biCode === (dbProd.name || '').toLowerCase() ||
-                     (localProd && biCode === (localProd.barcode || '').toLowerCase());
+              const biCode = String(bi.barcode || '').trim().toLowerCase();
+              if (!biCode) return false;
+              return (dbBarcode && biCode === dbBarcode) || 
+                     (dbAsin && biCode === dbAsin) || 
+                     (dbModel && biCode === dbModel) ||
+                     (dbName && biCode === dbName) ||
+                     (lpCode && biCode === lpCode);
             });
             if (boxItem && boxItem.pcs > 0) {
               itemBoxes.push(`${boxItem.pcs}(${box.name})`);
