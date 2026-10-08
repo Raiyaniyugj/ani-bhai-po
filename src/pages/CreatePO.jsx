@@ -423,14 +423,14 @@ export default function CreatePO() {
                  (dbAsin && pCode === dbAsin) || 
                  (dbModel && pCode === dbModel) ||
                  (dbName && pCode === dbName);
-        }) || (dbProd.packedQty !== undefined ? dbProd : null);
+        });
 
         const lpCode = localProd ? String(localProd.barcode || '').trim().toLowerCase() : '';
 
         // Quantities
         const totalQty = localProd ? localProd.totalQty : (dbProd.totalQty || 0);
         const packedQty = localProd ? localProd.packedQty : 0;
-        const historicalPacked = localProd ? (localProd.historicalPacked || 0) : (dbProd.totalPacked || 0);
+        const historicalPacked = dbProd.packedQty || 0;
 
         // Boxes - collect ALL possible identifiers for this product
         const itemBoxes = [];
