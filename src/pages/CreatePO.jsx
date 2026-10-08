@@ -1431,6 +1431,20 @@ export default function CreatePO() {
                         <Box size={18} className={activeBoxName.trim() === box.name ? 'text-indigo-500' : 'text-slate-400'} /> {box.name}
                       </h3>
                       <div className="flex items-center gap-1.5">
+                        {activeBoxName.trim() === box.name && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newBoxName = `Box ${boxes.length + 1}`;
+                              setBoxes(prev => [...prev, { name: newBoxName, items: [] }]);
+                              setActiveBoxName(newBoxName);
+                            }}
+                            className="text-[10px] font-bold text-white bg-indigo-500 hover:bg-indigo-600 px-2 py-1 rounded-md shadow-sm transition-colors"
+                            title="Mark as full and create new box"
+                          >
+                            Box Full
+                          </button>
+                        )}
                         <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg shadow-sm">
                           {boxPcs} pcs total
                         </span>
