@@ -6,7 +6,7 @@ import CreatePO from './pages/CreatePO';
 import POList from './pages/POList';
 import CompanyDashboard from './pages/CompanyDashboard';
 import Products from './pages/Products';
-import { FileText, PlusCircle, LayoutDashboard, ScanLine, QrCode, FileSpreadsheet } from 'lucide-react';
+import { FileText, PlusCircle, LayoutDashboard, ScanLine, QrCode, FileSpreadsheet, Download } from 'lucide-react';
 import CameraScanner from './components/CameraScanner';
 import { useState } from 'react';
 
@@ -70,22 +70,31 @@ function Navigation() {
         >
           <PlusCircle size={18} /> New PO
         </Link>
+
+        <button
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('export-excel'));
+          }}
+          className="flex items-center gap-2 font-medium transition-colors text-emerald-600 hover:text-emerald-700"
+        >
+          <Download size={18} /> Export
+        </button>
       </nav>
 
       {/* Mobile Bottom Tab Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[76px] bg-white border-t border-slate-200 flex justify-around items-center px-2 pb-safe z-50">
-        <Link to="/dashboard" className="flex flex-col items-center justify-center w-20 gap-1">
+        <Link to="/dashboard" className="flex flex-col items-center justify-center w-[16%] gap-1">
           <div className={`p-1.5 rounded-full ${path === '/dashboard' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500'}`}>
-            <LayoutDashboard size={24} />
+            <LayoutDashboard size={22} />
           </div>
-          <span className={`text-[11px] font-bold ${path === '/dashboard' ? 'text-indigo-700' : 'text-slate-500'}`}>Overview</span>
+          <span className={`text-[10px] font-bold ${path === '/dashboard' ? 'text-indigo-700' : 'text-slate-500'}`}>Overview</span>
         </Link>
 
-        <Link to="/list" className="flex flex-col items-center justify-center w-20 gap-1">
+        <Link to="/list" className="flex flex-col items-center justify-center w-[16%] gap-1">
           <div className={`p-1.5 rounded-full ${path === '/list' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500'}`}>
-            <FileText size={24} />
+            <FileText size={22} />
           </div>
-          <span className={`text-[11px] font-bold ${path === '/list' ? 'text-indigo-700' : 'text-slate-500'}`}>POs</span>
+          <span className={`text-[10px] font-bold ${path === '/list' ? 'text-indigo-700' : 'text-slate-500'}`}>POs</span>
         </Link>
 
         <button
@@ -97,14 +106,13 @@ function Navigation() {
               window.dispatchEvent(new CustomEvent('open-camera-scanner'));
             }
           }}
-          className="flex flex-col items-center justify-center w-20 gap-1"
+          className="flex flex-col items-center justify-center w-[16%] gap-1"
         >
           <div className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100">
-            <QrCode size={24} />
+            <QrCode size={22} />
           </div>
-          <span className="text-[11px] font-bold text-slate-500">Scan</span>
+          <span className="text-[10px] font-bold text-slate-500">Scan</span>
         </button>
-
 
         <button
           onClick={() => {
@@ -112,12 +120,12 @@ function Navigation() {
             // Give time for /create to mount if it wasn't mounted
             setTimeout(() => window.dispatchEvent(new CustomEvent('open-import-modal')), 50);
           }}
-          className="flex flex-col items-center justify-center w-20 gap-1"
+          className="flex flex-col items-center justify-center w-[16%] gap-1"
         >
           <div className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100">
-            <FileSpreadsheet size={24} />
+            <FileSpreadsheet size={22} />
           </div>
-          <span className="text-[11px] font-bold text-slate-500">Import</span>
+          <span className="text-[10px] font-bold text-slate-500">Import</span>
         </button>
 
         <Link
@@ -128,13 +136,25 @@ function Navigation() {
             sessionStorage.setItem('force_blank_po', 'true');
             window.dispatchEvent(new CustomEvent('clear-po-form', { detail: { fullClear: false } }));
           }}
-          className="flex flex-col items-center justify-center w-20 gap-1"
+          className="flex flex-col items-center justify-center w-[16%] gap-1"
         >
           <div className={`p-1.5 rounded-full ${path === '/create' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500'}`}>
-            <PlusCircle size={24} />
+            <PlusCircle size={22} />
           </div>
-          <span className={`text-[11px] font-bold ${path === '/create' ? 'text-indigo-700' : 'text-slate-500'}`}>New PO</span>
+          <span className={`text-[10px] font-bold ${path === '/create' ? 'text-indigo-700' : 'text-slate-500'}`}>New PO</span>
         </Link>
+
+        <button
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('export-excel'));
+          }}
+          className="flex flex-col items-center justify-center w-[16%] gap-1"
+        >
+          <div className="p-1.5 rounded-full text-emerald-600 hover:bg-emerald-50">
+            <Download size={22} />
+          </div>
+          <span className="text-[10px] font-bold text-emerald-600">Export</span>
+        </button>
       </nav>
 
       {isGlobalScannerOpen && (

@@ -387,6 +387,12 @@ export default function CreatePO() {
     XLSX.writeFile(workbook, `Draft_${nextPoNo}_${companyName || 'PO'}.xlsx`);
   };
 
+  useEffect(() => {
+    const handleEvent = () => handleExportExcel();
+    window.addEventListener('export-excel', handleEvent);
+    return () => window.removeEventListener('export-excel', handleEvent);
+  }, [products, boxes, companyName, nextPoNo]);
+
   // Sync ref and localStorage
   useEffect(() => {
     productsRef.current = products;
