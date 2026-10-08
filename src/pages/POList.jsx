@@ -254,7 +254,7 @@ export default function POList() {
   const companies = ['All', ...Array.from(new Set(pos.map(po => po.companyName).filter(Boolean)))];
 
   const filteredPOs = pos.filter((po) => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.trim().toLowerCase();
     const matchesCompany = (po.companyName || '').toLowerCase().includes(searchLower);
     const matchesPoNo = (po.poNo || '').toLowerCase().includes(searchLower);
     const matchesBarcode = po.items?.some(item => 
@@ -373,8 +373,8 @@ export default function POList() {
                 ) : (
                   sortedPOs.map((po, idx) => {
                     const pcs = po.totalPcs || (po.items ? po.items.reduce((acc, i) => acc + (i.qty || 0), 0) : 0);
-                    const searchLower = searchTerm.toLowerCase();
-                    const matchedItems = searchTerm ? (po.items || []).filter(item => 
+                    const searchLower = searchTerm.trim().toLowerCase();
+                    const matchedItems = searchTerm.trim() ? (po.items || []).filter(item => 
                       (item.barcode || '').toLowerCase().includes(searchLower) ||
                       (item.name || '').toLowerCase().includes(searchLower)
                     ) : [];
@@ -445,8 +445,8 @@ export default function POList() {
             sortedPOs.map((po) => {
               const pcs = po.totalPcs || (po.items ? po.items.reduce((acc, i) => acc + (i.qty || 0), 0) : 0);
               const boxesCount = po.boxes ? po.boxes.length : 0;
-              const searchLower = searchTerm.toLowerCase();
-              const matchedItems = searchTerm ? (po.items || []).filter(item => 
+              const searchLower = searchTerm.trim().toLowerCase();
+              const matchedItems = searchTerm.trim() ? (po.items || []).filter(item => 
                 (item.barcode || '').toLowerCase().includes(searchLower) ||
                 (item.name || '').toLowerCase().includes(searchLower)
               ) : [];
