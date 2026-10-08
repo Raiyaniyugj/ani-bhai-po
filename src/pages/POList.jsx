@@ -257,7 +257,10 @@ export default function POList() {
     const searchLower = searchTerm.toLowerCase();
     const matchesCompany = (po.companyName || '').toLowerCase().includes(searchLower);
     const matchesPoNo = (po.poNo || '').toLowerCase().includes(searchLower);
-    const matchesBarcode = po.items?.some(item => (item.barcode || '').toLowerCase().includes(searchLower)) || false;
+    const matchesBarcode = po.items?.some(item => 
+      (item.barcode || '').toLowerCase().includes(searchLower) ||
+      (item.name || '').toLowerCase().includes(searchLower)
+    ) || false;
     
     const matchesSearch = matchesCompany || matchesPoNo || matchesBarcode;
     const matchesDate = filterDate ? po.createdAt.startsWith(filterDate) : true;
@@ -370,6 +373,12 @@ export default function POList() {
                 ) : (
                   sortedPOs.map((po, idx) => {
                     const pcs = po.totalPcs || (po.items ? po.items.reduce((acc, i) => acc + (i.qty || 0), 0) : 0);
+                    const searchLower = searchTerm.toLowerCase();
+                    const matchedItems = searchTerm ? (po.items || []).filter(item => 
+                      (item.barcode || '').toLowerCase().includes(searchLower) ||
+                      (item.name || '').toLowerCase().includes(searchLower)
+                    ) : [];
+
                     return (
                       <tr key={po._id} className="hover:bg-[#f8f9fc] transition-colors group">
                         <td className="p-4 text-center font-mono text-xs text-[#a0a5b8] font-medium">{idx + 1}</td>
@@ -379,8 +388,13 @@ export default function POList() {
                           {po.companyName}
                         </td>
                         <td className="p-4 text-[#565b73]">{new Date(po.createdAt).toLocaleDateString()}</td>
-                        <td className="p-4 text-center font-bold text-indigo-700">
-                          {pcs} pcs
+                        <td className="p-4 text-center">
+                          <div className="font-bold text-indigo-700">{pcs} pcs</div>
+                          {matchedItems.map((item, i) => (
+                            <div key={i} className="text-[11px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 rounded px-2 py-0.5 mt-1 inline-block max-w-[150px] truncate" title={`${item.qty} pcs of ${item.barcode || item.name}`}>
+                              {item.qty}x {item.barcode || item.name}
+                            </div>
+                          ))}
                         </td>
                         <td className="p-4 text-center">
                           <div className="flex items-center justify-center gap-1.5">
@@ -431,11 +445,17 @@ export default function POList() {
             sortedPOs.map((po) => {
               const pcs = po.totalPcs || (po.items ? po.items.reduce((acc, i) => acc + (i.qty || 0), 0) : 0);
               const boxesCount = po.boxes ? po.boxes.length : 0;
+              const searchLower = searchTerm.toLowerCase();
+              const matchedItems = searchTerm ? (po.items || []).filter(item => 
+                (item.barcode || '').toLowerCase().includes(searchLower) ||
+                (item.name || '').toLowerCase().includes(searchLower)
+              ) : [];
+
               return (
                 <div 
                   key={po._id}
                   onClick={() => setSelectedPO(po)}
-                  className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-4 flex items-center justify-between gap-3 active:scale-[0.98] transition-transform"
+                  className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-4 flex items-center justify-between gap-3 active:scale-[0.98] transition-transform cursor-pointer"
                 >
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <span className="font-mono font-black text-indigo-700 text-[16px]">{po.poNo}</span>
@@ -448,6 +468,11 @@ export default function POList() {
                     <div className="flex flex-col items-end">
                       <span className="text-[20px] font-black text-[#14172b] leading-none">{pcs}</span>
                       <span className="text-[10px] font-bold text-[#a0a5b8]">PCS</span>
+                      {matchedItems.map((item, i) => (
+                        <span key={i} className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 rounded px-1.5 py-0.5 mt-1 truncate max-w-[100px]">
+                          {item.qty}x {item.barcode || item.name}
+                        </span>
+                      ))}
                     </div>
 
                   </div>
