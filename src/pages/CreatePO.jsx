@@ -421,16 +421,28 @@ export default function CreatePO() {
 
         // Boxes
         const itemBoxes = [];
+        // Collect all possible identifiers for this product
+        const allCodes = new Set();
+        if (dbBarcode) allCodes.add(dbBarcode);
+        if (dbAsin) allCodes.add(dbAsin);
+        if (dbModel) allCodes.add(dbModel);
+        if (dbName) allCodes.add(dbName);
+        if (lpCode) allCodes.add(lpCode);
+        if (localProd) {
+          const lpAsin = String(localProd.asin || '').trim().toLowerCase();
+          const lpModel = String(localProd.modelNumber || '').trim().toLowerCase();
+          const lpName = String(localProd.name || '').trim().toLowerCase();
+          if (lpAsin) allCodes.add(lpAsin);
+          if (lpModel) allCodes.add(lpModel);
+          if (lpName) allCodes.add(lpName);
+        }
         if (boxes) {
           boxes.forEach(box => {
             const boxItem = (box.items || []).find(bi => {
               const biCode = String(bi.barcode || '').trim().toLowerCase();
-              if (!biCode) return false;
-              return (dbBarcode && biCode === dbBarcode) || 
-                     (dbAsin && biCode === dbAsin) || 
-                     (dbModel && biCode === dbModel) ||
-                     (dbName && biCode === dbName) ||
-                     (lpCode && biCode === lpCode);
+              const biName = String(bi.name || '').trim().toLowerCase();
+              if (!biCode && !biName) return false;
+              return (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
             });
             if (boxItem && boxItem.pcs > 0) {
               itemBoxes.push(`${boxItem.pcs}(${box.name})`);

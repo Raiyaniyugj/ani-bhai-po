@@ -241,8 +241,23 @@ export default function POList() {
     
     const excelData = items.map((item, idx) => {
       const itemBoxes = [];
+      // Collect all possible identifiers for this item
+      const allCodes = new Set();
+      const itemBarcode = String(item.barcode || '').trim().toLowerCase();
+      const itemAsin = String(item.asin || '').trim().toLowerCase();
+      const itemModel = String(item.modelNumber || '').trim().toLowerCase();
+      const itemName = String(item.name || '').trim().toLowerCase();
+      if (itemBarcode) allCodes.add(itemBarcode);
+      if (itemAsin) allCodes.add(itemAsin);
+      if (itemModel) allCodes.add(itemModel);
+      if (itemName) allCodes.add(itemName);
       boxes.forEach(box => {
-        const boxItem = (box.items || []).find(bi => bi.barcode === item.barcode);
+        const boxItem = (box.items || []).find(bi => {
+          const biCode = String(bi.barcode || '').trim().toLowerCase();
+          const biName = String(bi.name || '').trim().toLowerCase();
+          if (!biCode && !biName) return false;
+          return (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
+        });
         if (boxItem && boxItem.pcs > 0) {
           itemBoxes.push(`${boxItem.pcs}(${box.name})`);
         }
