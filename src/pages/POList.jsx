@@ -237,13 +237,27 @@ export default function POList() {
   const handleExportExcel = (po) => {
     if (!po) return;
     const items = po.items || [];
-    const excelData = items.map((item, idx) => ({
-      "#": idx + 1,
-      "Model Number": item.name,
-      "Barcode": item.barcode,
-      "Total Qty": item.totalQty || item.qty,
-      "Packed Pcs": item.qty
-    }));
+    const boxes = po.boxes || [];
+    
+    const excelData = items.map((item, idx) => {
+      const itemBoxes = [];
+      boxes.forEach(box => {
+        const boxItem = (box.items || []).find(bi => bi.barcode === item.barcode);
+        if (boxItem && boxItem.pcs > 0) {
+          itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+        }
+      });
+
+      return {
+        "#": idx + 1,
+        "Model Number": item.name,
+        "Barcode": item.barcode,
+        "Total Qty": item.totalQty || item.qty,
+        "Packed Pcs": item.qty,
+        "Boxes": itemBoxes.join(', ')
+      };
+    });
+    
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Products");

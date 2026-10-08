@@ -356,19 +356,30 @@ export default function CreatePO() {
   }, []);
 
   const handleExportExcel = () => {
-    if (products.length === 0) {
+    if (!products || products.length === 0) {
       alert("No products to export!");
       return;
     }
-    const excelData = products.map((p, idx) => ({
-      "#": idx + 1,
-      "Model Number": p.name || p.modelNumber || p.asin || p.barcode,
-      "Barcode": p.barcode,
-      "Company": p.companyName || companyName || 'Common',
-      "Total Qty": p.totalQty,
-      "Packed": p.packedQty,
-      "Remaining": Math.max(0, p.totalQty - (p.historicalPacked || 0) - p.packedQty)
-    }));
+    const excelData = products.map((p, idx) => {
+      const itemBoxes = [];
+      boxes.forEach(box => {
+        const boxItem = (box.items || []).find(bi => bi.barcode === p.barcode);
+        if (boxItem && boxItem.pcs > 0) {
+          itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+        }
+      });
+
+      return {
+        "#": idx + 1,
+        "Model Number": p.name || p.modelNumber || p.asin || p.barcode,
+        "Barcode": p.barcode,
+        "Company": p.companyName || companyName || 'Common',
+        "Total Qty": p.totalQty,
+        "Packed": p.packedQty,
+        "Boxes": itemBoxes.join(', '),
+        "Remaining": Math.max(0, p.totalQty - (p.historicalPacked || 0) - p.packedQty)
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
