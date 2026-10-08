@@ -487,11 +487,6 @@ export default function CreatePO() {
           "Remaining": Math.max(0, totalQty - historicalPacked - packedQty),
           "Boxes": itemBoxes.join(', ')
         };
-      }).filter(row => row["Packed Pcs"] > 0);
-
-      // Re-index the row numbers after filtering
-      excelData.forEach((row, idx) => {
-        row["#"] = idx + 1;
       });
 
       const worksheet = XLSX.utils.json_to_sheet(excelData);
