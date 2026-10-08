@@ -39,20 +39,26 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data);
     } catch (error) {
       console.error('Failed to fetch user', error);
-      logout();
+      // Only logout on 401 (Invalid/Expired token)
+      // This prevents logging the user out if the server is just sleeping or having a network error
+      if (error.response && error.response.status === 401) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const login = async (email, password, rememberMe) => {
-    const res = await axios.post(`${API_URL}/login`, { email, password });
+    const res = await axios.post(`${API_URL}/login`, { email, password, rememberMe });
     const { user, token } = res.data;
     
     if (rememberMe) {
       localStorage.setItem('token', token);
+      sessionStorage.removeItem('token');
     } else {
       sessionStorage.setItem('token', token);
+      localStorage.removeItem('token');
     }
     
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -63,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     const res = await axios.post(`${API_URL}/register`, { email, password, name });
     const { user, token } = res.data;
     localStorage.setItem('token', token); // Default to remember for registration
+    sessionStorage.removeItem('token');
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(user);
   };

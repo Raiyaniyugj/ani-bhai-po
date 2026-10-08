@@ -505,7 +505,8 @@ export default function CreatePO() {
 
     let newTotal = existing ? existing.totalQty : 0;
     if (!isNaN(parsedRemain) && parsedRemain > 0) {
-      newTotal = currentPacked + parsedRemain;
+      const histPacked = activeProduct ? (activeProduct.historicalPacked || 0) : 0;
+      newTotal = currentPacked + parsedRemain + histPacked;
     }
     const newPacked = currentPacked + pcs;
     newTotal = Math.max(newTotal, newPacked);
@@ -670,7 +671,7 @@ export default function CreatePO() {
     const num = parseInt(val, 10);
     const newRemain = isNaN(num) ? 0 : num;
     if (activeProduct) {
-      const newTotal = newRemain + activeProduct.packedQty;
+      const newTotal = newRemain + activeProduct.packedQty + (activeProduct.historicalPacked || 0);
       setActiveProduct(prev => prev ? { ...prev, totalQty: newTotal } : null);
       setProducts(prev => prev.map(p =>
         p.barcode === activeProduct.barcode ? { ...p, totalQty: newTotal } : p

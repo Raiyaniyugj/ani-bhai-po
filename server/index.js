@@ -104,7 +104,7 @@ app.post('/api/register', async (req, res) => {
     const user = new User({ email, password: hashedPassword, name });
     await user.save();
     
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '30d' });
     res.status(201).json({ user: { id: user._id, email: user.email, name: user.name }, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -113,14 +113,15 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    const expiresIn = rememberMe ? '30d' : '1d';
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
     res.json({ user: { id: user._id, email: user.email, name: user.name }, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -431,9 +432,18 @@ app.post('/api/po', auth, async (req, res) => {
     // Update packedQty for each product
     for (const item of items) {
       if (item.barcode && item.barcode !== 'N/A') {
+        const searchRegex = new RegExp(`^${item.barcode.replace(/[-[\]{}()*+?.,\\^$|#\\s]/g, '\\$&')}$`, 'i');
         await Product.updateOne(
-          { barcode: item.barcode },
-          { $inc: { packedQty: item.qty } }
+          { 
+            user: req.user.id,
+            $or: [
+              { barcode: item.barcode },
+              { barcode: { $regex: searchRegex } },
+              { asin: { $regex: searchRegex } },
+              { modelNumber: { $regex: searchRegex } }
+            ]
+          },
+          { $inc: { packedQty: parseInt(item.qty, 10) || 0 } }
         );
       }
     }

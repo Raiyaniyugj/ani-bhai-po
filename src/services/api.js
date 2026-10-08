@@ -16,7 +16,7 @@ const API_URL = getApiUrl();
 
 export const fetchProductByBarcode = async (barcode) => {
   try {
-    const response = await axios.get(`${API_URL}/products/${barcode}`);
+    const response = await axios.get(`${API_URL}/products/${barcode}?_t=${Date.now()}`);
     return response.data;
   } catch (error) {
     if (error.response && error.response.status === 404) {
