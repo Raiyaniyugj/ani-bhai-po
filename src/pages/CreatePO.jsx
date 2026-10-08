@@ -482,12 +482,16 @@ export default function CreatePO() {
           "#": idx + 1,
           "Model Number": localProd?.name || dbProd.name || dbProd.modelNumber || dbProd.asin || dbProd.barcode,
           "Barcode": dbProd.barcode,
-          "Company": dbProd.companyName || companyName || 'Common',
           "Total Qty": totalQty,
-          "Packed": packedQty,
+          "Packed Pcs": packedQty,
           "Remaining": Math.max(0, totalQty - historicalPacked - packedQty),
           "Boxes": itemBoxes.join(', ')
         };
+      }).filter(row => row["Packed Pcs"] > 0);
+
+      // Re-index the row numbers after filtering
+      excelData.forEach((row, idx) => {
+        row["#"] = idx + 1;
       });
 
       const worksheet = XLSX.utils.json_to_sheet(excelData);
