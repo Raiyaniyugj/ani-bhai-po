@@ -175,6 +175,9 @@ app.post('/api/products/bulk', auth, async (req, res) => {
       return res.status(400).json({ message: 'No products provided' });
     }
 
+    // Delete existing products for the user to replace with the new Excel data
+    await Product.deleteMany({ user: req.user.id });
+
     // Deduplicate products based on calculated barcode to prevent E11000 errors
     // when the same product appears multiple times in the Excel sheet
     const deduplicatedProducts = {};
