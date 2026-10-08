@@ -948,9 +948,6 @@ export default function CreatePO() {
         }));
       }
 
-      // Auto-export the PO before clearing the form
-      await handleExportExcel();
-
       handleClearForm(false); // Retain imported master sheet and company
     } catch (err) {
       console.error(err);
