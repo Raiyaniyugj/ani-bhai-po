@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, Box, Building2, ScanLine, Search, Check, Save, PlusCircle, CheckCircle2, X, Pencil, Trash2, FileSpreadsheet, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { fetchProductByBarcode, createPO, getPOs, getNextPoNumber, createProduct } from '../services/api';
+import { fetchProductByBarcode, createPO, getPOs, getNextPoNumber, createProduct, getProducts } from '../services/api';
 import CameraScanner from '../components/CameraScanner';
 import ExcelImportModal from '../components/ExcelImportModal';
 
@@ -355,36 +355,83 @@ export default function CreatePO() {
     refreshNextPoNo();
   }, []);
 
-  const handleExportExcel = () => {
-    if (!products || products.length === 0) {
-      alert("No products to export!");
-      return;
-    }
-    const excelData = products.map((p, idx) => {
-      const itemBoxes = [];
-      boxes.forEach(box => {
-        const boxItem = (box.items || []).find(bi => bi.barcode === p.barcode);
-        if (boxItem && boxItem.pcs > 0) {
-          itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+  const handleExportExcel = async () => {
+    try {
+      let dbProducts = [];
+      try {
+        dbProducts = await getProducts();
+      } catch (err) {
+        console.warn("Failed to fetch products for export, falling back to local products", err);
+      }
+
+      // Filter by company name if we have one selected
+      let companyProducts = companyName
+        ? dbProducts.filter(p => (p.companyName || '').toLowerCase() === companyName.toLowerCase())
+        : dbProducts;
+
+      if (companyProducts.length === 0 && (!products || products.length === 0)) {
+        alert("No products to export!");
+        return;
+      }
+
+      // Map of scanned products
+      const scannedMap = new Map();
+      if (products) {
+        products.forEach(p => {
+          scannedMap.set(p.barcode, p);
+        });
+      }
+
+      // Merge list: Start with all DB products, then append any scanned products that aren't in DB
+      const exportList = [...companyProducts];
+      const dbBarcodes = new Set(companyProducts.map(p => p.barcode));
+      if (products) {
+        products.forEach(p => {
+          if (!dbBarcodes.has(p.barcode)) {
+            exportList.push(p);
+          }
+        });
+      }
+
+      const excelData = exportList.map((dbProd, idx) => {
+        const localProd = scannedMap.get(dbProd.barcode);
+
+        // Quantities
+        const totalQty = localProd ? localProd.totalQty : (dbProd.totalQty || 0);
+        const packedQty = localProd ? localProd.packedQty : 0;
+        const historicalPacked = localProd ? (localProd.historicalPacked || 0) : (dbProd.totalPacked || 0);
+
+        // Boxes
+        const itemBoxes = [];
+        if (boxes) {
+          boxes.forEach(box => {
+            const boxItem = (box.items || []).find(bi => bi.barcode === dbProd.barcode);
+            if (boxItem && boxItem.pcs > 0) {
+              itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+            }
+          });
         }
+
+        return {
+          "#": idx + 1,
+          "Model Number": localProd?.name || dbProd.name || dbProd.modelNumber || dbProd.asin || dbProd.barcode,
+          "Barcode": dbProd.barcode,
+          "Company": dbProd.companyName || companyName || 'Common',
+          "Total Qty": totalQty,
+          "Packed": packedQty,
+          "Boxes": itemBoxes.join(', '),
+          "Remaining": Math.max(0, totalQty - historicalPacked - packedQty)
+        };
       });
 
-      return {
-        "#": idx + 1,
-        "Model Number": p.name || p.modelNumber || p.asin || p.barcode,
-        "Barcode": p.barcode,
-        "Company": p.companyName || companyName || 'Common',
-        "Total Qty": p.totalQty,
-        "Packed": p.packedQty,
-        "Boxes": itemBoxes.join(', '),
-        "Remaining": Math.max(0, p.totalQty - (p.historicalPacked || 0) - p.packedQty)
-      };
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Current Order");
-    XLSX.writeFile(workbook, `Draft_${nextPoNo}_${companyName || 'PO'}.xlsx`);
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Current Order");
+      XLSX.writeFile(workbook, `Draft_${nextPoNo}_${companyName || 'PO'}.xlsx`);
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while exporting.");
+    }
   };
 
   useEffect(() => {
