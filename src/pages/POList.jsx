@@ -256,10 +256,19 @@ export default function POList() {
           const biCode = String(bi.barcode || '').trim().toLowerCase();
           const biName = String(bi.name || '').trim().toLowerCase();
           if (!biCode && !biName) return false;
-          return (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
+          
+          const matchesDB = (itemBarcode && biCode === itemBarcode) ||
+                            (itemAsin && biCode === itemAsin) ||
+                            (itemModel && biCode === itemModel) ||
+                            (itemName && biName === itemName) ||
+                            (itemName && biCode === itemName) ||
+                            (itemBarcode && biName === itemBarcode);
+
+          return matchesDB || (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
         });
+
         if (boxItem && boxItem.pcs > 0) {
-          itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+          itemBoxes.push(`${boxItem.pcs}(${box.name || 'Box'})`);
         }
       });
 

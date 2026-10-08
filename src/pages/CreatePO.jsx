@@ -454,10 +454,25 @@ export default function CreatePO() {
             const biCode = String(bi.barcode || '').trim().toLowerCase();
             const biName = String(bi.name || '').trim().toLowerCase();
             if (!biCode && !biName) return false;
-            return (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
+            
+            // Check if this box item matches the database product OR the local product
+            const matchesDB = (dbBarcode && biCode === dbBarcode) ||
+                              (dbAsin && biCode === dbAsin) ||
+                              (dbModel && biCode === dbModel) ||
+                              (dbName && biName === dbName) ||
+                              (dbName && biCode === dbName) ||
+                              (dbBarcode && biName === dbBarcode);
+            
+            const matchesLocal = localProd && (
+              (lpCode && biCode === lpCode) ||
+              (localProd.name && biName === String(localProd.name).trim().toLowerCase())
+            );
+
+            return matchesDB || matchesLocal || (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
           });
+
           if (boxItem && boxItem.pcs > 0) {
-            itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+            itemBoxes.push(`${boxItem.pcs}(${box.name || 'Box'})`);
           }
         });
 
