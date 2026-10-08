@@ -314,6 +314,7 @@ export default function CreatePO() {
 
   const pcsInputRef = useRef(null);
   const productsRef = useRef(products);
+  const boxesRef = useRef(boxes);
 
   useEffect(() => {
     // Check if we need to auto-open scanner (coming from another page)
@@ -357,6 +358,20 @@ export default function CreatePO() {
 
   const handleExportExcel = async () => {
     try {
+      // Always read latest from refs and localStorage
+      const currentProducts = productsRef.current || [];
+      let currentBoxes = boxesRef.current || [];
+      // Fallback: also try localStorage if ref is empty
+      if (currentBoxes.length === 0 || (currentBoxes.length === 1 && (currentBoxes[0].items || []).length === 0)) {
+        try {
+          const savedBoxes = localStorage.getItem('active_po_boxes');
+          if (savedBoxes) {
+            const parsed = JSON.parse(savedBoxes);
+            if (parsed && parsed.length > 0) currentBoxes = parsed;
+          }
+        } catch (e) { /* ignore */ }
+      }
+
       let dbProducts = [];
       try {
         dbProducts = await getProducts();
@@ -369,32 +384,30 @@ export default function CreatePO() {
         ? dbProducts.filter(p => (p.companyName || '').toLowerCase() === companyName.toLowerCase())
         : dbProducts;
 
-      if (companyProducts.length === 0 && (!products || products.length === 0)) {
+      if (companyProducts.length === 0 && currentProducts.length === 0) {
         alert("No products to export!");
         return;
       }
 
       // Merge list: Start with all DB products, then append any scanned products that aren't in DB
       const exportList = [...companyProducts];
-      if (products) {
-        products.forEach(p => {
-          const pCode = String(p.barcode || '').trim().toLowerCase();
-          if (!pCode) return;
-          const exists = companyProducts.some(cp => {
-            const dbBarcode = String(cp.barcode || '').trim().toLowerCase();
-            const dbAsin = String(cp.asin || '').trim().toLowerCase();
-            const dbModel = String(cp.modelNumber || '').trim().toLowerCase();
-            const dbName = String(cp.name || '').trim().toLowerCase();
-            return (dbBarcode && dbBarcode === pCode) ||
-                   (dbAsin && dbAsin === pCode) ||
-                   (dbModel && dbModel === pCode) ||
-                   (dbName && dbName === pCode);
-          });
-          if (!exists) {
-            exportList.push(p);
-          }
+      currentProducts.forEach(p => {
+        const pCode = String(p.barcode || '').trim().toLowerCase();
+        if (!pCode) return;
+        const exists = companyProducts.some(cp => {
+          const cpBarcode = String(cp.barcode || '').trim().toLowerCase();
+          const cpAsin = String(cp.asin || '').trim().toLowerCase();
+          const cpModel = String(cp.modelNumber || '').trim().toLowerCase();
+          const cpName = String(cp.name || '').trim().toLowerCase();
+          return (cpBarcode && cpBarcode === pCode) ||
+                 (cpAsin && cpAsin === pCode) ||
+                 (cpModel && cpModel === pCode) ||
+                 (cpName && cpName === pCode);
         });
-      }
+        if (!exists) {
+          exportList.push(p);
+        }
+      });
 
       const excelData = exportList.map((dbProd, idx) => {
         const dbBarcode = String(dbProd.barcode || '').trim().toLowerCase();
@@ -403,14 +416,14 @@ export default function CreatePO() {
         const dbName = String(dbProd.name || '').trim().toLowerCase();
 
         // Robust matching to find if this item was packed locally
-        const localProd = (products || []).find(p => {
+        const localProd = currentProducts.find(p => {
           const pCode = String(p.barcode || '').trim().toLowerCase();
           if (!pCode) return false;
           return (dbBarcode && pCode === dbBarcode) || 
                  (dbAsin && pCode === dbAsin) || 
                  (dbModel && pCode === dbModel) ||
                  (dbName && pCode === dbName);
-        }) || (dbProd.packedQty !== undefined ? dbProd : null); // If dbProd IS the localProd (appended)
+        }) || (dbProd.packedQty !== undefined ? dbProd : null);
 
         const lpCode = localProd ? String(localProd.barcode || '').trim().toLowerCase() : '';
 
@@ -419,9 +432,8 @@ export default function CreatePO() {
         const packedQty = localProd ? localProd.packedQty : 0;
         const historicalPacked = localProd ? (localProd.historicalPacked || 0) : (dbProd.totalPacked || 0);
 
-        // Boxes
+        // Boxes - collect ALL possible identifiers for this product
         const itemBoxes = [];
-        // Collect all possible identifiers for this product
         const allCodes = new Set();
         if (dbBarcode) allCodes.add(dbBarcode);
         if (dbAsin) allCodes.add(dbAsin);
@@ -436,19 +448,18 @@ export default function CreatePO() {
           if (lpModel) allCodes.add(lpModel);
           if (lpName) allCodes.add(lpName);
         }
-        if (boxes) {
-          boxes.forEach(box => {
-            const boxItem = (box.items || []).find(bi => {
-              const biCode = String(bi.barcode || '').trim().toLowerCase();
-              const biName = String(bi.name || '').trim().toLowerCase();
-              if (!biCode && !biName) return false;
-              return (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
-            });
-            if (boxItem && boxItem.pcs > 0) {
-              itemBoxes.push(`${boxItem.pcs}(${box.name})`);
-            }
+
+        currentBoxes.forEach(box => {
+          const boxItem = (box.items || []).find(bi => {
+            const biCode = String(bi.barcode || '').trim().toLowerCase();
+            const biName = String(bi.name || '').trim().toLowerCase();
+            if (!biCode && !biName) return false;
+            return (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
           });
-        }
+          if (boxItem && boxItem.pcs > 0) {
+            itemBoxes.push(`${boxItem.pcs}(${box.name})`);
+          }
+        });
 
         return {
           "#": idx + 1,
@@ -478,6 +489,7 @@ export default function CreatePO() {
     return () => window.removeEventListener('export-excel', handleEvent);
   }, [products, boxes, companyName, nextPoNo]);
 
+
   // Sync ref and localStorage
   useEffect(() => {
     productsRef.current = products;
@@ -489,6 +501,7 @@ export default function CreatePO() {
   }, [companyName]);
 
   useEffect(() => {
+    boxesRef.current = boxes;
     localStorage.setItem('active_po_boxes', JSON.stringify(boxes));
   }, [boxes]);
 
