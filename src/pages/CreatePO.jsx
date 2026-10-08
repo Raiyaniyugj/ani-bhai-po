@@ -374,27 +374,32 @@ export default function CreatePO() {
         return;
       }
 
-      // Map of scanned products
-      const scannedMap = new Map();
-      if (products) {
-        products.forEach(p => {
-          scannedMap.set(p.barcode, p);
-        });
-      }
-
       // Merge list: Start with all DB products, then append any scanned products that aren't in DB
       const exportList = [...companyProducts];
-      const dbBarcodes = new Set(companyProducts.map(p => p.barcode));
       if (products) {
         products.forEach(p => {
-          if (!dbBarcodes.has(p.barcode)) {
+          const pCode = (p.barcode || '').toLowerCase();
+          const exists = companyProducts.some(cp => 
+            (cp.barcode || '').toLowerCase() === pCode ||
+            (cp.asin || '').toLowerCase() === pCode ||
+            (cp.modelNumber || '').toLowerCase() === pCode ||
+            (cp.name || '').toLowerCase() === pCode
+          );
+          if (!exists) {
             exportList.push(p);
           }
         });
       }
 
       const excelData = exportList.map((dbProd, idx) => {
-        const localProd = scannedMap.get(dbProd.barcode);
+        // Robust matching to find if this item was packed locally
+        const localProd = (products || []).find(p => {
+          const pCode = (p.barcode || '').toLowerCase();
+          return pCode === (dbProd.barcode || '').toLowerCase() || 
+                 pCode === (dbProd.asin || '').toLowerCase() || 
+                 pCode === (dbProd.modelNumber || '').toLowerCase() ||
+                 pCode === (dbProd.name || '').toLowerCase();
+        }) || (dbProd.packedQty !== undefined ? dbProd : null); // If dbProd IS the localProd (appended)
 
         // Quantities
         const totalQty = localProd ? localProd.totalQty : (dbProd.totalQty || 0);
@@ -405,7 +410,14 @@ export default function CreatePO() {
         const itemBoxes = [];
         if (boxes) {
           boxes.forEach(box => {
-            const boxItem = (box.items || []).find(bi => bi.barcode === dbProd.barcode);
+            const boxItem = (box.items || []).find(bi => {
+              const biCode = (bi.barcode || '').toLowerCase();
+              return biCode === (dbProd.barcode || '').toLowerCase() || 
+                     biCode === (dbProd.asin || '').toLowerCase() || 
+                     biCode === (dbProd.modelNumber || '').toLowerCase() ||
+                     biCode === (dbProd.name || '').toLowerCase() ||
+                     (localProd && biCode === (localProd.barcode || '').toLowerCase());
+            });
             if (boxItem && boxItem.pcs > 0) {
               itemBoxes.push(`${boxItem.pcs}(${box.name})`);
             }
