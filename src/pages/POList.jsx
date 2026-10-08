@@ -252,10 +252,11 @@ export default function POList() {
       if (itemModel) allCodes.add(itemModel);
       if (itemName) allCodes.add(itemName);
       boxes.forEach(box => {
-        const boxItem = (box.items || []).find(bi => {
+        let boxTotalPcs = 0;
+        (box.items || []).forEach(bi => {
           const biCode = String(bi.barcode || '').trim().toLowerCase();
           const biName = String(bi.name || '').trim().toLowerCase();
-          if (!biCode && !biName) return false;
+          if (!biCode && !biName) return;
           
           const matchesDB = (itemBarcode && biCode === itemBarcode) ||
                             (itemAsin && biCode === itemAsin) ||
@@ -264,11 +265,13 @@ export default function POList() {
                             (itemName && biCode === itemName) ||
                             (itemBarcode && biName === itemBarcode);
 
-          return matchesDB || (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
+          if (matchesDB || (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName))) {
+            boxTotalPcs += bi.pcs;
+          }
         });
 
-        if (boxItem && boxItem.pcs > 0) {
-          itemBoxes.push(`${boxItem.pcs}(${box.name || 'Box'})`);
+        if (boxTotalPcs > 0) {
+          itemBoxes.push(`${boxTotalPcs}(${box.name || 'Box'})`);
         }
       });
 

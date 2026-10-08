@@ -450,12 +450,12 @@ export default function CreatePO() {
         }
 
         currentBoxes.forEach(box => {
-          const boxItem = (box.items || []).find(bi => {
+          let boxTotalPcs = 0;
+          (box.items || []).forEach(bi => {
             const biCode = String(bi.barcode || '').trim().toLowerCase();
             const biName = String(bi.name || '').trim().toLowerCase();
-            if (!biCode && !biName) return false;
+            if (!biCode && !biName) return;
             
-            // Check if this box item matches the database product OR the local product
             const matchesDB = (dbBarcode && biCode === dbBarcode) ||
                               (dbAsin && biCode === dbAsin) ||
                               (dbModel && biCode === dbModel) ||
@@ -468,11 +468,13 @@ export default function CreatePO() {
               (localProd.name && biName === String(localProd.name).trim().toLowerCase())
             );
 
-            return matchesDB || matchesLocal || (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName));
+            if (matchesDB || matchesLocal || (biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName))) {
+              boxTotalPcs += bi.pcs;
+            }
           });
 
-          if (boxItem && boxItem.pcs > 0) {
-            itemBoxes.push(`${boxItem.pcs}(${box.name || 'Box'})`);
+          if (boxTotalPcs > 0) {
+            itemBoxes.push(`${boxTotalPcs}(${box.name || 'Box'})`);
           }
         });
 
