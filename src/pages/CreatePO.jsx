@@ -372,6 +372,13 @@ export default function CreatePO() {
         } catch (e) { /* ignore */ }
       }
 
+      let allPOs = [];
+      try {
+        allPOs = await getPOs();
+      } catch (e) {
+        console.warn("Failed to fetch POs for historical boxes");
+      }
+
       let dbProducts = [];
       try {
         dbProducts = await getProducts();
@@ -429,8 +436,10 @@ export default function CreatePO() {
 
         // Quantities
         const totalQty = localProd ? localProd.totalQty : (dbProd.totalQty || 0);
-        const packedQty = localProd ? localProd.packedQty : 0;
+        const currentPackedQty = localProd ? localProd.packedQty : 0;
         const historicalPacked = dbProd.packedQty || 0;
+        
+        const totalPacked = historicalPacked + currentPackedQty;
 
         // Boxes - collect ALL possible identifiers for this product
         const itemBoxes = [];
@@ -448,6 +457,26 @@ export default function CreatePO() {
           if (lpModel) allCodes.add(lpModel);
           if (lpName) allCodes.add(lpName);
         }
+
+        // Search historical POs for boxes
+        const companyPOs = companyName ? allPOs.filter(po => (po.companyName || '').toLowerCase() === companyName.toLowerCase()) : allPOs;
+        companyPOs.forEach(po => {
+          (po.boxes || []).forEach(box => {
+            let boxTotalPcs = 0;
+            (box.items || []).forEach(bi => {
+              const biCode = String(bi.barcode || '').trim().toLowerCase();
+              const biName = String(bi.name || '').trim().toLowerCase();
+              if (!biCode && !biName) return;
+              
+              if ((biCode && allCodes.has(biCode)) || (biName && allCodes.has(biName))) {
+                boxTotalPcs += bi.pcs;
+              }
+            });
+            if (boxTotalPcs > 0) {
+              itemBoxes.push(`${boxTotalPcs}(${box.name || 'Box'} [${po.poNo}])`);
+            }
+          });
+        });
 
         currentBoxes.forEach(box => {
           let boxTotalPcs = 0;
@@ -474,7 +503,7 @@ export default function CreatePO() {
           });
 
           if (boxTotalPcs > 0) {
-            itemBoxes.push(`${boxTotalPcs}(${box.name || 'Box'})`);
+            itemBoxes.push(`${boxTotalPcs}(${box.name || 'Box'} [Draft])`);
           }
         });
 
@@ -483,8 +512,8 @@ export default function CreatePO() {
           "Model Number": localProd?.name || dbProd.name || dbProd.modelNumber || dbProd.asin || dbProd.barcode,
           "Barcode": dbProd.barcode,
           "Total Qty": totalQty,
-          "Packed Pcs": packedQty,
-          "Remaining": Math.max(0, totalQty - historicalPacked - packedQty),
+          "Packed Pcs": totalPacked,
+          "Remaining": Math.max(0, totalQty - totalPacked),
           "Boxes": itemBoxes.join(', ')
         };
       });
