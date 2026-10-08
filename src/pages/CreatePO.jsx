@@ -286,6 +286,8 @@ export default function CreatePO() {
   });
 
   const [activeBoxName, setActiveBoxName] = useState('Box 1');
+  const [editingBoxIndex, setEditingBoxIndex] = useState(null);
+  const [editBoxNameValue, setEditBoxNameValue] = useState('');
 
   // Form input states
   const [barcodeInput, setBarcodeInput] = useState('');
@@ -566,6 +568,61 @@ export default function CreatePO() {
     setPcsInput('');
     setActiveProduct(null);
     return true;
+  };
+
+  const saveBoxName = (idx) => {
+    const newName = editBoxNameValue.trim();
+    if (newName && newName !== boxes[idx].name) {
+      setBoxes(prev => {
+        const newBoxes = [...prev];
+        const oldName = newBoxes[idx].name;
+        newBoxes[idx] = { ...newBoxes[idx], name: newName };
+        if (activeBoxName.trim() === oldName) {
+          setActiveBoxName(newName);
+        }
+        return newBoxes;
+      });
+    }
+    setEditingBoxIndex(null);
+  };
+
+  const handleDeleteBox = (indexToRemove) => {
+    const boxToRemove = boxes[indexToRemove];
+    if (window.confirm(`Are you sure you want to delete "${boxToRemove.name}"?`)) {
+      // Return packed quantities to products
+      setProducts(prevProducts => {
+        const newProducts = [...prevProducts];
+        boxToRemove.items.forEach(item => {
+          const productIndex = newProducts.findIndex(p => p.barcode === item.barcode);
+          if (productIndex >= 0) {
+            newProducts[productIndex] = {
+              ...newProducts[productIndex],
+              packedQty: Math.max(0, newProducts[productIndex].packedQty - item.pcs)
+            };
+          }
+        });
+        return newProducts;
+      });
+
+      // Remove the box
+      setBoxes(prev => {
+        const remainingBoxes = prev.filter((_, idx) => idx !== indexToRemove);
+        if (remainingBoxes.length === 0) {
+          return [{ name: 'Box 1', items: [] }];
+        }
+        return remainingBoxes;
+      });
+      
+      // If we deleted the active box, switch to the first available box
+      if (activeBoxName.trim() === boxToRemove.name) {
+        if (boxes.length > 1) {
+          const firstAvailable = boxes.find((_, idx) => idx !== indexToRemove);
+          setActiveBoxName(firstAvailable.name);
+        } else {
+          setActiveBoxName('Box 1');
+        }
+      }
+    }
   };
 
   // Lookup barcode function (used for typing, pressing Enter, or camera scan)
@@ -1428,7 +1485,53 @@ export default function CreatePO() {
                   <div key={idx} className={`bg-white rounded-xl shadow-sm border p-4 transition-all ${activeBoxName.trim() === box.name ? 'border-indigo-500 ring-1 ring-indigo-500 shadow-md' : 'border-slate-200'}`}>
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                        <Box size={18} className={activeBoxName.trim() === box.name ? 'text-indigo-500' : 'text-slate-400'} /> {box.name}
+                        <Box size={18} className={activeBoxName.trim() === box.name ? 'text-indigo-500' : 'text-slate-400'} />
+                        {editingBoxIndex === idx ? (
+                          <input
+                            type="text"
+                            value={editBoxNameValue}
+                            onChange={e => setEditBoxNameValue(e.target.value)}
+                            onBlur={() => saveBoxName(idx)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') saveBoxName(idx);
+                              if (e.key === 'Escape') setEditingBoxIndex(null);
+                            }}
+                            autoFocus
+                            className="border border-indigo-300 rounded px-1.5 py-0.5 text-sm outline-none w-24 md:w-32"
+                          />
+                        ) : (
+                          <>
+                            <span 
+                              className="cursor-pointer hover:underline decoration-slate-300 underline-offset-2"
+                              onClick={() => {
+                                setEditingBoxIndex(idx);
+                                setEditBoxNameValue(box.name);
+                              }}
+                              title="Click to edit name"
+                            >
+                              {box.name}
+                            </span>
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                setEditingBoxIndex(idx);
+                                setEditBoxNameValue(box.name);
+                              }}
+                              className="text-slate-400 hover:text-indigo-500"
+                              title="Edit box name"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteBox(idx)}
+                              className="text-slate-400 hover:text-rose-500"
+                              title="Delete box"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        )}
                       </h3>
                       <div className="flex items-center gap-1.5">
                         {activeBoxName.trim() === box.name && (
