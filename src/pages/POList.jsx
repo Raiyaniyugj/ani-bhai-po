@@ -254,6 +254,7 @@ export default function POList() {
         "Barcode": item.barcode,
         "Total Qty": item.totalQty || item.qty,
         "Packed Pcs": item.qty,
+        "Remaining": Math.max(0, (item.totalQty || item.qty) - item.qty),
         "Boxes": itemBoxes.join(', ')
       };
     });

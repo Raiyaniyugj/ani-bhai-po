@@ -445,8 +445,8 @@ export default function CreatePO() {
           "Company": dbProd.companyName || companyName || 'Common',
           "Total Qty": totalQty,
           "Packed": packedQty,
-          "Boxes": itemBoxes.join(', '),
-          "Remaining": Math.max(0, totalQty - historicalPacked - packedQty)
+          "Remaining": Math.max(0, totalQty - historicalPacked - packedQty),
+          "Boxes": itemBoxes.join(', ')
         };
       });
 
