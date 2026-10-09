@@ -2,94 +2,33 @@ if (!process.env.VERCEL) {
   require('dotenv').config();
 }
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const { Op } = require('sequelize');
 
-const PO = require('./models/PO');
-const Product = require('./models/Product');
+const { sequelize, connectMySQL } = require('./db');
+const PO = require('./models_sql/PO');
+const Product = require('./models_sql/Product');
+const User = require('./models_sql/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const auth = require('./middleware/auth');
-const User = require('./models/User');
-
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const getMongoUri = () => process.env.MONGO_URI || process.env.MONGODB_URI || (!process.env.VERCEL ? 'mongodb://localhost:27017/po_app' : '');
 
-// Serverless-friendly cached MongoDB connection
-let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-  const mongoUri = getMongoUri();
-  if (!mongoUri) {
-    throw new Error('MONGO_URI is not set in Vercel. Please add your MongoDB Atlas connection string to your Vercel Project Environment Variables.');
-  }
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-    cached.promise = mongoose.connect(mongoUri, opts).then(async (m) => {
-      console.log('Connected to MongoDB');
-      try {
-        const count = await Product.countDocuments();
-        if (count === 0) {
-          await Product.insertMany([
-            { barcode: '123456789', name: 'Premium Wireless Headphones', price: 199.99 },
-            { barcode: '987654321', name: 'Ergonomic Office Chair', price: 249.50 },
-            { barcode: '111222333', name: 'Mechanical Keyboard RGB', price: 129.00 },
-            { barcode: '444555666', name: '4K Ultra HD Monitor', price: 349.99 },
-          ]);
-        }
-      } catch (seedErr) {
-        console.error('Error during initial product seed:', seedErr);
-      }
-      return m;
-    }).catch(err => {
-      cached.promise = null;
-      throw err;
-    });
-  }
-  try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
-  return cached.conn;
-}
-
-// Ensure database is connected before handling any API request
+// Ensure DB connection before API requests
 app.use(async (req, res, next) => {
   if (!req.path.startsWith('/api')) return next();
   try {
-    await connectDB();
+    await connectMySQL();
     next();
   } catch (err) {
-    const rawUri = getMongoUri();
-    const sanitizedUri = rawUri ? rawUri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@') : 'NOT_SET';
-    console.error(`Database connection error [Target: ${sanitizedUri}]:`, err);
-    res.status(500).json({ 
-      message: 'Database connection failed', 
-      configuredUri: sanitizedUri,
-      hint: sanitizedUri.includes('localhost') || sanitizedUri.includes('127.0.0.1')
-        ? 'Your Vercel environment variable MONGO_URI is set to localhost. Cloud deployments on Vercel cannot reach your local computer. Please provide a MongoDB Atlas cloud connection string (mongodb+srv://...).'
-        : 'Ensure your MongoDB Atlas network access allows access from anywhere (0.0.0.0/0).',
-      error: err.message 
-    });
+    res.status(500).json({ message: 'Database connection failed', error: err.message });
   }
 });
-
-// --- API Endpoints ---
 
 // AUTH ROUTES
 app.post('/api/register', async (req, res) => {
@@ -97,15 +36,14 @@ app.post('/api/register', async (req, res) => {
     const { email, password, name } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
     
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ where: { email } });
     if (existingUser) return res.status(400).json({ error: 'Email already exists' });
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, name });
-    await user.save();
+    const user = await User.create({ email, password: hashedPassword, name });
     
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '30d' });
-    res.status(201).json({ user: { id: user._id, email: user.email, name: user.name }, token });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '30d' });
+    res.status(201).json({ user: { id: user.id, email: user.email, name: user.name }, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -114,15 +52,15 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email } });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     
     const expiresIn = rememberMe ? '30d' : '1d';
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
-    res.json({ user: { id: user._id, email: user.email, name: user.name }, token });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
+    res.json({ user: { id: user.id, email: user.email, name: user.name }, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -130,18 +68,18 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/auth/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ id: user.id, email: user.email, name: user.name });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-
 // Draft Routes
 app.get('/api/draft', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findByPk(req.user.id);
     res.json(user.draftPO || null);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -150,7 +88,7 @@ app.get('/api/draft', auth, async (req, res) => {
 
 app.put('/api/draft', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findByPk(req.user.id);
     user.draftPO = req.body;
     await user.save();
     res.json({ success: true });
@@ -165,18 +103,16 @@ app.get('/api/products/:barcode', auth, async (req, res) => {
     const rawCode = (req.params.barcode || '').trim();
     if (!rawCode) return res.status(400).json({ message: 'Barcode is required' });
 
-    const escaped = rawCode.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    const exactRegex = new RegExp(`^${escaped}$`, 'i');
-
     const product = await Product.findOne({
-      user: req.user.id,
-      $or: [
-        { barcode: rawCode },
-        { barcode: { $regex: exactRegex } },
-        { asin: { $regex: exactRegex } },
-        { modelNumber: { $regex: exactRegex } },
-        { name: { $regex: exactRegex } }
-      ]
+      where: {
+        UserId: req.user.id,
+        [Op.or]: [
+          { barcode: rawCode },
+          { asin: rawCode },
+          { modelNumber: rawCode },
+          { name: rawCode }
+        ]
+      }
     });
 
     if (!product) {
@@ -188,7 +124,7 @@ app.get('/api/products/:barcode', auth, async (req, res) => {
   }
 });
 
-// Bulk upsert products (from Excel import)
+// Bulk upsert products
 app.post('/api/products/bulk', auth, async (req, res) => {
   try {
     const { products, companyName } = req.body;
@@ -196,16 +132,12 @@ app.post('/api/products/bulk', auth, async (req, res) => {
       return res.status(400).json({ message: 'No products provided' });
     }
 
-    // Delete existing products for the user to replace with the new Excel data
-    await Product.deleteMany({ user: req.user.id });
+    await Product.destroy({ where: { UserId: req.user.id } });
 
-    // Deduplicate products based on calculated barcode to prevent E11000 errors
-    // when the same product appears multiple times in the Excel sheet
     const deduplicatedProducts = {};
     for (const item of products) {
       let barcode = (item.barcode || item.asin || item.modelNumber || '').trim();
       if (!barcode) {
-        // Use random string instead of Date.now() to avoid collisions for multiple items
         barcode = `ITEM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       }
 
@@ -218,63 +150,34 @@ app.post('/api/products/bulk', auth, async (req, res) => {
       }
     }
 
-    const uniqueProducts = Object.values(deduplicatedProducts);
+    const uniqueProducts = Object.values(deduplicatedProducts).map(item => ({
+      UserId: req.user.id,
+      barcode: item.barcode,
+      asin: (item.asin || '').trim(),
+      modelNumber: (item.modelNumber || '').trim(),
+      name: (item.name || item.modelNumber || item.asin || item.barcode).trim(),
+      totalQty: parseInt(item.totalQty, 10) || 0,
+      price: parseFloat(item.price) || 0,
+      companyName: (companyName || item.companyName || '').trim()
+    }));
 
-    const operations = uniqueProducts.map(item => {
-      const barcode = item.barcode;
-      const asin = (item.asin || '').trim();
-      const modelNumber = (item.modelNumber || '').trim();
-      const name = (item.name || modelNumber || asin || barcode).trim();
-      const totalQty = parseInt(item.totalQty, 10) || 0;
-      const price = parseFloat(item.price) || 0;
-      const comp = (companyName || item.companyName || '').trim();
-
-      const updateDoc = {
-        user: req.user.id,
-        name,
-        totalQty,
-        price,
-        companyName: comp
-      };
-      if (asin) updateDoc.asin = asin;
-      if (modelNumber) updateDoc.modelNumber = modelNumber;
-
-      return {
-        updateOne: {
-          filter: {
-            user: req.user.id,
-            $or: [
-              { barcode },
-              ...(asin ? [{ asin }] : []),
-              ...(modelNumber ? [{ modelNumber }] : [])
-            ]
-          },
-          update: {
-            $set: updateDoc,
-            $setOnInsert: { barcode }
-          },
-          upsert: true
-        }
-      };
-    });
-
-    const bulkResult = await Product.bulkWrite(operations);
-
-    // Return the updated products
+    await Product.bulkCreate(uniqueProducts);
+    
     const identifiers = products.map(p => (p.barcode || p.asin || p.modelNumber || '').trim()).filter(Boolean);
-    const savedProducts = await Product.find({
-      $or: [
-        { barcode: { $in: identifiers } },
-        { asin: { $in: identifiers } },
-        { modelNumber: { $in: identifiers } }
-      ]
+    const savedProducts = await Product.findAll({
+      where: {
+        UserId: req.user.id,
+        [Op.or]: [
+          { barcode: { [Op.in]: identifiers } },
+          { asin: { [Op.in]: identifiers } },
+          { modelNumber: { [Op.in]: identifiers } }
+        ]
+      }
     });
 
     res.json({
       success: true,
       message: `Successfully processed ${products.length} products`,
-      upsertedCount: bulkResult.upsertedCount,
-      modifiedCount: bulkResult.modifiedCount,
       products: savedProducts
     });
   } catch (err) {
@@ -286,7 +189,10 @@ app.post('/api/products/bulk', auth, async (req, res) => {
 // Get all Products
 app.get('/api/products', auth, async (req, res) => {
   try {
-    const products = await Product.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const products = await Product.findAll({
+      where: { UserId: req.user.id },
+      order: [['createdAt', 'DESC']]
+    });
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -298,15 +204,15 @@ app.post('/api/products', auth, async (req, res) => {
   try {
     const { barcode, name, asin, modelNumber, totalQty, price, companyName } = req.body;
     
-    // Check if barcode already exists
-    const existing = await Product.findOne({ barcode, user: req.user.id });
+    const finalBarcode = barcode || `ITEM-${Date.now().toString().slice(-6)}`;
+    const existing = await Product.findOne({ where: { barcode: finalBarcode, UserId: req.user.id } });
     if (existing) {
       return res.status(400).json({ message: 'Product with this barcode already exists' });
     }
 
-    const newProduct = new Product({
-      barcode: barcode || `ITEM-${Date.now().toString().slice(-6)}`,
-      user: req.user.id,
+    const newProduct = await Product.create({
+      barcode: finalBarcode,
+      UserId: req.user.id,
       name: name || modelNumber || asin || 'New Product',
       asin: asin || '',
       modelNumber: modelNumber || '',
@@ -315,8 +221,7 @@ app.post('/api/products', auth, async (req, res) => {
       companyName: companyName || ''
     });
 
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
+    res.status(201).json(newProduct);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -328,9 +233,8 @@ app.put('/api/products/:barcode', auth, async (req, res) => {
     const oldBarcode = req.params.barcode;
     const { barcode, name, asin, modelNumber, totalQty, companyName } = req.body;
     
-    // Check if new barcode already exists
     if (barcode && barcode !== oldBarcode) {
-      const existing = await Product.findOne({ barcode });
+      const existing = await Product.findOne({ where: { barcode, UserId: req.user.id } });
       if (existing) {
         return res.status(400).json({ message: 'Product with this new barcode already exists' });
       }
@@ -343,24 +247,27 @@ app.put('/api/products/:barcode', auth, async (req, res) => {
     if (totalQty !== undefined) updateFields.totalQty = totalQty;
     if (companyName !== undefined) updateFields.companyName = companyName;
 
-    // Update in Product collection
-    await Product.findOneAndUpdate(
-      { barcode: oldBarcode, user: req.user.id },
-      { $set: updateFields },
-      { new: true }
-    );
+    await Product.update(updateFields, {
+      where: { barcode: oldBarcode, UserId: req.user.id }
+    });
     
-    // Update in PO items
     if (name || barcode) {
-      const setObj = {};
-      if (barcode) setObj["items.$[elem].barcode"] = barcode;
-      if (name) setObj["items.$[elem].name"] = name;
-
-      await PO.updateMany(
-        { "items.barcode": oldBarcode },
-        { $set: setObj },
-        { arrayFilters: [ { "elem.barcode": oldBarcode } ] }
-      );
+      const pos = await PO.findAll({ where: { UserId: req.user.id } });
+      for (let po of pos) {
+        let changed = false;
+        let newItems = po.items ? [...po.items] : [];
+        newItems.forEach(item => {
+          if (item.barcode === oldBarcode) {
+             if(barcode) item.barcode = barcode;
+             if(name) item.name = name;
+             changed = true;
+          }
+        });
+        if (changed) {
+          po.items = newItems;
+          await po.save();
+        }
+      }
     }
 
     res.json({ success: true, message: 'Product updated' });
@@ -370,9 +277,8 @@ app.put('/api/products/:barcode', auth, async (req, res) => {
   }
 });
 
-// Helper for sequential ascending PO Number (PO-0001, PO-0002, PO-0003...)
 const getNextPoNumber = async () => {
-  const allPOs = await PO.find({}, { poNo: 1 });
+  const allPOs = await PO.findAll({ attributes: ['poNo'] });
   let maxSeq = 0;
   for (const p of allPOs) {
     const m = (p.poNo || '').match(/^PO-(\d+)$/i);
@@ -384,15 +290,14 @@ const getNextPoNumber = async () => {
     }
   }
   let nextNum = maxSeq + 1;
-  while (await PO.exists({ poNo: `PO-${nextNum}` })) {
+  while (await PO.findOne({ where: { poNo: `PO-${nextNum}` } })) {
     nextNum++;
   }
   return `PO-${nextNum}`;
 };
 
-// Helper for sequential ascending Box Number (BOX-0001, BOX-0002...)
 const getNextBoxNumber = async () => {
-  const allPOs = await PO.find({}, { boxNo: 1 });
+  const allPOs = await PO.findAll({ attributes: ['boxNo'] });
   let maxSeq = 0;
   for (const p of allPOs) {
     const m = (p.boxNo || '').match(/^BOX-(\d+)$/i);
@@ -404,13 +309,12 @@ const getNextBoxNumber = async () => {
     }
   }
   let nextNum = maxSeq + 1;
-  while (await PO.exists({ boxNo: `BOX-${nextNum}` })) {
+  while (await PO.findOne({ where: { boxNo: `BOX-${nextNum}` } })) {
     nextNum++;
   }
   return `BOX-${nextNum}`;
 };
 
-// Get next sequential PO number
 app.get('/api/po/next-number', auth, async (req, res) => {
   try {
     const nextPoNo = await getNextPoNumber();
@@ -420,7 +324,6 @@ app.get('/api/po/next-number', auth, async (req, res) => {
   }
 });
 
-// Create new PO
 app.post('/api/po', auth, async (req, res) => {
   try {
     const poNo = await getNextPoNumber();
@@ -440,7 +343,7 @@ app.post('/api/po', auth, async (req, res) => {
     const totalPcs = req.body.totalPcs || items.reduce((sum, i) => sum + i.qty, 0);
     const totalAmount = req.body.totalAmount || items.reduce((sum, i) => sum + (i.price * i.qty), 0);
 
-    const newPO = new PO({
+    const savedPO = await PO.create({
       ...req.body,
       poNo,
       boxNo,
@@ -448,27 +351,18 @@ app.post('/api/po', auth, async (req, res) => {
       totalAmount,
       items,
       boxes: req.body.boxes || [],
-      user: req.user.id
+      UserId: req.user.id
     });
 
-    const savedPO = await newPO.save();
-
-    // Update packedQty for each product
     for (const item of items) {
       if (item.barcode && item.barcode !== 'N/A') {
-        const searchRegex = new RegExp(`^${item.barcode.replace(/[-[\]{}()*+?.,\\^$|#\\s]/g, '\\$&')}$`, 'i');
-        await Product.updateOne(
-          { 
-            user: req.user.id,
-            $or: [
-              { barcode: item.barcode },
-              { barcode: { $regex: searchRegex } },
-              { asin: { $regex: searchRegex } },
-              { modelNumber: { $regex: searchRegex } }
-            ]
-          },
-          { $inc: { packedQty: parseInt(item.qty, 10) || 0 } }
-        );
+        const product = await Product.findOne({
+          where: { UserId: req.user.id, barcode: item.barcode }
+        });
+        if (product) {
+          product.packedQty = (product.packedQty || 0) + (parseInt(item.qty, 10) || 0);
+          await product.save();
+        }
       }
     }
     res.status(201).json(savedPO);
@@ -478,20 +372,21 @@ app.post('/api/po', auth, async (req, res) => {
   }
 });
 
-// Get all POs - line-wise in ascending order
 app.get('/api/po', auth, async (req, res) => {
   try {
-    const pos = await PO.find({ user: req.user.id }).collation({ locale: 'en', numericOrdering: true }).sort({ poNo: 1 });
+    const pos = await PO.findAll({ 
+      where: { UserId: req.user.id },
+      order: [['poNo', 'ASC']]
+    });
     res.json(pos);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get single PO
 app.get('/api/po/:id', auth, async (req, res) => {
   try {
-    const po = await PO.findOne({ _id: req.params.id, user: req.user.id });
+    const po = await PO.findOne({ where: { id: req.params.id, UserId: req.user.id } });
     if (!po) {
       return res.status(404).json({ message: 'PO not found' });
     }
@@ -501,13 +396,13 @@ app.get('/api/po/:id', auth, async (req, res) => {
   }
 });
 
-// Delete PO
 app.delete('/api/po/:id', auth, async (req, res) => {
   try {
-    const po = await PO.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    const po = await PO.findOne({ where: { id: req.params.id, UserId: req.user.id } });
     if (!po) {
       return res.status(404).json({ message: 'PO not found' });
     }
+    await po.destroy();
     res.json({ message: 'PO deleted successfully', id: req.params.id });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

@@ -175,7 +175,7 @@ const PODetailModal = ({ po, onClose, onDelete, onExportExcel }) => {
               <Download size={16} /> Export Excel
             </button>
             <button
-              onClick={() => onDelete(po._id, po.poNo)}
+              onClick={() => onDelete(po.id || po._id, po.poNo)}
               className="px-4 py-2 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm"
             >
               <Trash2 size={16} /> Delete PO
@@ -224,8 +224,8 @@ export default function POList() {
     }
     try {
       await deletePO(id);
-      setPos(prev => prev.filter(p => p._id !== id));
-      if (selectedPO && selectedPO._id === id) {
+      setPos(prev => prev.filter(p => (p.id || p._id) !== id));
+      if (selectedPO && (selectedPO.id || selectedPO._id) === id) {
         setSelectedPO(null);
       }
     } catch (err) {
@@ -422,7 +422,7 @@ export default function POList() {
                     ) : [];
 
                     return (
-                      <tr key={po._id} className="hover:bg-[#f8f9fc] transition-colors group">
+                      <tr key={po.id || po._id} className="hover:bg-[#f8f9fc] transition-colors group">
                         <td className="p-4 text-center font-mono text-xs text-[#a0a5b8] font-medium">{idx + 1}</td>
                         <td className="p-4 text-indigo-700 font-mono font-bold">{po.poNo}</td>
                         <td className="p-4 font-medium text-[#14172b] flex items-center gap-2">
@@ -455,7 +455,7 @@ export default function POList() {
                               <Download size={18} />
                             </button>
                             <button 
-                              onClick={() => handleDelete(po._id, po.poNo)}
+                              onClick={() => handleDelete(po.id || po._id, po.poNo)}
                               title="Delete Purchase Order"
                               className="text-orange-700 hover:text-orange-900 p-2 rounded-lg transition-colors bg-orange-50 hover:bg-orange-100 border border-orange-100"
                             >
@@ -495,7 +495,7 @@ export default function POList() {
 
               return (
                 <div 
-                  key={po._id}
+                  key={po.id || po._id}
                   onClick={() => setSelectedPO(po)}
                   className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-4 flex items-center justify-between gap-3 active:scale-[0.98] transition-transform cursor-pointer"
                 >

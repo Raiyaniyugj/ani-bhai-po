@@ -127,7 +127,7 @@ export default function CompanyDashboard() {
                           {company.orders.map(order => {
                             const pcs = order.totalPcs || (order.items ? order.items.reduce((sum, i) => sum + (i.qty || 0), 0) : 0);
                             return (
-                              <tr key={order._id} className="hover:bg-[#f8f9fc]">
+                              <tr key={order.id || order._id} className="hover:bg-[#f8f9fc]">
                                 <td className="p-3 pl-4 font-mono font-bold text-indigo-700">{order.poNo}</td>
                                 <td className="p-3 text-[#565b73] text-[13px] font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
                                 <td className="p-3 pr-4 text-right font-bold text-[#14172b]">{pcs}</td>
@@ -142,7 +142,7 @@ export default function CompanyDashboard() {
                       {company.orders.map(order => {
                         const pcs = order.totalPcs || (order.items ? order.items.reduce((sum, i) => sum + (i.qty || 0), 0) : 0);
                         return (
-                          <div key={order._id} className="flex justify-between items-center p-4">
+                          <div key={order.id || order._id} className="flex justify-between items-center p-4">
                             <div className="flex flex-col">
                               <span className="font-mono font-bold text-indigo-700 text-[15px]">{order.poNo}</span>
                               <span className="text-[#565b73] text-[12px] font-medium">{new Date(order.createdAt).toLocaleDateString()}</span>
