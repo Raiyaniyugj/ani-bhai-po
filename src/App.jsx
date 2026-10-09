@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './pages/AuthPage';
 
@@ -25,7 +25,7 @@ function Navigation() {
   const path = location.pathname;
 
   const [isGlobalScannerOpen, setIsGlobalScannerOpen] = useState(false);
-  const navigate = require('react-router-dom').useNavigate(); // We need useNavigate
+  const navigate = useNavigate(); // We need useNavigate
 
   const handleGlobalScan = (code) => {
     setIsGlobalScannerOpen(false);
