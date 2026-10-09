@@ -1176,7 +1176,7 @@ export default function CreatePO() {
         </div>
 
         {/* 2. Two tiles side by side: PO NUMBER and TOTAL QUANTITY */}
-        <div className="flex items-center gap-2 sm:gap-3 w-full">
+        <div className="flex items-stretch gap-2 sm:gap-3 w-full">
           {/* PO Number Badge */}
           <div className="bg-indigo-50 px-2 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl border border-indigo-100 flex flex-col items-center justify-center flex-1 min-w-0">
             <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-700 mb-0.5 sm:mb-1 truncate">PO Number</span>
