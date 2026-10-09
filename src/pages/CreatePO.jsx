@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, Box, Building2, ScanLine, Search, Check, Save, PlusCircle, CheckCircle2, X, Pencil, Trash2, FileSpreadsheet, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { fetchProductByBarcode, createPO, getPOs, getNextPoNumber, createProduct, getProducts } from '../services/api';
+import { fetchProductByBarcode, createPO, getPOs, getNextPoNumber, createProduct, getProducts, getDraftPO, saveDraftPO } from '../services/api';
 import CameraScanner from '../components/CameraScanner';
 import ExcelImportModal from '../components/ExcelImportModal';
 
@@ -262,28 +262,12 @@ const AddProductModal = ({ onClose, onSave, activeCompanyName }) => {
 
 
 export default function CreatePO() {
-  const [companyName, setCompanyName] = useState(() => {
-    return localStorage.getItem('active_po_company') || '';
-  });
+  const [companyName, setCompanyName] = useState('');
 
   // App state
-  const [products, setProducts] = useState(() => {
-    try {
-      const saved = localStorage.getItem('active_po_products');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [products, setProducts] = useState([]);
 
-  const [boxes, setBoxes] = useState(() => {
-    try {
-      const saved = localStorage.getItem('active_po_boxes');
-      return saved ? JSON.parse(saved) : [{ name: 'Box 1', items: [] }];
-    } catch {
-      return [{ name: 'Box 1', items: [] }];
-    }
-  });
+  const [boxes, setBoxes] = useState([{ name: 'Box 1', items: [] }]);
 
   const [activeBoxName, setActiveBoxName] = useState('Box 1');
   const [editingBoxIndex, setEditingBoxIndex] = useState(null);
@@ -297,14 +281,20 @@ export default function CreatePO() {
   const [activeProduct, setActiveProduct] = useState(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [importedFileMeta, setImportedFileMeta] = useState(() => {
-    try {
-      const saved = localStorage.getItem('active_po_imported_meta');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [importedFileMeta, setImportedFileMeta] = useState(null);
+  const [isDraftLoading, setIsDraftLoading] = useState(true);
+
+  useEffect(() => {
+    getDraftPO().then(draft => {
+      if (draft) {
+        if (draft.companyName) setCompanyName(draft.companyName);
+        if (draft.products && draft.products.length > 0) setProducts(draft.products);
+        if (draft.boxes && draft.boxes.length > 0) setBoxes(draft.boxes);
+        if (draft.importedFileMeta) setImportedFileMeta(draft.importedFileMeta);
+      }
+      setIsDraftLoading(false);
+    });
+  }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [nextPoNo, setNextPoNo] = useState('PO-0001');
@@ -362,15 +352,7 @@ export default function CreatePO() {
       const currentProducts = productsRef.current || [];
       let currentBoxes = boxesRef.current || [];
       // Fallback: also try localStorage if ref is empty
-      if (currentBoxes.length === 0 || (currentBoxes.length === 1 && (currentBoxes[0].items || []).length === 0)) {
-        try {
-          const savedBoxes = localStorage.getItem('active_po_boxes');
-          if (savedBoxes) {
-            const parsed = JSON.parse(savedBoxes);
-            if (parsed && parsed.length > 0) currentBoxes = parsed;
-          }
-        } catch (e) { /* ignore */ }
-      }
+
 
       let allPOs = [];
       try {
@@ -535,28 +517,27 @@ export default function CreatePO() {
   }, [products, boxes, companyName, nextPoNo]);
 
 
-  // Sync ref and localStorage
+  // Sync refs and backend draft
   useEffect(() => {
     productsRef.current = products;
-    localStorage.setItem('active_po_products', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem('active_po_company', companyName);
-  }, [companyName]);
-
-  useEffect(() => {
     boxesRef.current = boxes;
-    localStorage.setItem('active_po_boxes', JSON.stringify(boxes));
   }, [boxes]);
 
   useEffect(() => {
-    if (importedFileMeta) {
-      localStorage.setItem('active_po_imported_meta', JSON.stringify(importedFileMeta));
-    } else {
-      localStorage.removeItem('active_po_imported_meta');
-    }
-  }, [importedFileMeta]);
+    if (isDraftLoading) return;
+    const timer = setTimeout(() => {
+      saveDraftPO({
+        companyName,
+        products,
+        boxes,
+        importedFileMeta
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [companyName, products, boxes, importedFileMeta, isDraftLoading]);
 
   const handleClearForm = (fullClear = false) => {
     sessionStorage.removeItem('force_blank_po');
@@ -564,8 +545,6 @@ export default function CreatePO() {
     if (fullClear) {
       setCompanyName('');
       setImportedFileMeta(null);
-      localStorage.removeItem('active_po_company');
-      localStorage.removeItem('active_po_imported_meta');
       loadedCompanyRef.current = '';
     }
 
@@ -577,8 +556,6 @@ export default function CreatePO() {
     setRemainingInput('');
     setPcsInput('');
     setActiveProduct(null);
-    localStorage.removeItem('active_po_products');
-    localStorage.removeItem('active_po_boxes');
     refreshNextPoNo();
   };
 

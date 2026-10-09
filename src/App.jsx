@@ -61,8 +61,6 @@ function Navigation() {
         <Link
           to="/create"
           onClick={() => {
-            localStorage.removeItem('active_po_products');
-            localStorage.removeItem('active_po_boxes');
             sessionStorage.setItem('force_blank_po', 'true');
             window.dispatchEvent(new CustomEvent('clear-po-form', { detail: { fullClear: false } }));
           }}
@@ -131,8 +129,6 @@ function Navigation() {
         <Link
           to="/create"
           onClick={() => {
-            localStorage.removeItem('active_po_products');
-            localStorage.removeItem('active_po_boxes');
             sessionStorage.setItem('force_blank_po', 'true');
             window.dispatchEvent(new CustomEvent('clear-po-form', { detail: { fullClear: false } }));
           }}

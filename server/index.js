@@ -138,6 +138,27 @@ app.get('/api/auth/me', auth, async (req, res) => {
 });
 
 
+// Draft Routes
+app.get('/api/draft', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    res.json(user.draftPO || null);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/draft', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    user.draftPO = req.body;
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get Product by barcode, ASIN, or modelNumber
 app.get('/api/products/:barcode', auth, async (req, res) => {
   try {

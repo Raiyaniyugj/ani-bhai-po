@@ -99,3 +99,23 @@ export const bulkImportProducts = async (products, companyName = '') => {
     throw new Error(msg);
   }
 };
+
+export const getDraftPO = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/draft`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get draft PO', error);
+    return null;
+  }
+};
+
+export const saveDraftPO = async (draftData) => {
+  try {
+    const response = await axios.put(`${API_URL}/draft`, draftData);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to save draft PO', error);
+    return null;
+  }
+};
