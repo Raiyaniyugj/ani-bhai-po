@@ -1144,12 +1144,12 @@ export default function CreatePO() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 sm:gap-4">
         {/* 1. Company Name card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#e4e6f0] p-3 sm:p-4 flex flex-col gap-2">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-[#e4e6f0] p-2 sm:p-4 flex flex-col gap-1.5 sm:gap-2">
           <div className="flex items-center justify-between">
-            <label className="text-[12px] font-bold text-[#565b73] flex items-center gap-2 uppercase tracking-wider">
-              <Building2 size={20} className="text-indigo-700" /> Company Name
+            <label className="text-[10px] sm:text-[12px] font-bold text-[#565b73] flex items-center gap-1.5 sm:gap-2 uppercase tracking-wider">
+              <Building2 className="text-indigo-700 w-[16px] h-[16px] sm:w-[20px] sm:h-[20px]" /> Company Name
             </label>
             <button
               type="button"
@@ -1157,16 +1157,16 @@ export default function CreatePO() {
                 setCompanyName('');
                 setTimeout(() => document.getElementById('company-input')?.focus(), 10);
               }}
-              className="text-[12px] font-bold text-indigo-700 bg-indigo-100 px-3 py-1.5 rounded-full flex items-center gap-1"
+              className="text-[10px] sm:text-[12px] font-bold text-indigo-700 bg-indigo-100 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1"
             >
-              <PlusCircle size={14} /> Add New
+              <PlusCircle className="w-[12px] h-[12px] sm:w-[14px] sm:h-[14px]" /> Add New
             </button>
           </div>
           <input
             id="company-input"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            className="w-full h-[52px] px-4 bg-[#f8f9fc] border-[1.5px] border-[#e4e6f0] rounded-2xl outline-none focus:bg-white focus:border-indigo-700 transition-all font-medium text-[15px]"
+            className="w-full h-10 sm:h-[52px] px-3 sm:px-4 bg-[#f8f9fc] border-[1.5px] border-[#e4e6f0] rounded-lg sm:rounded-2xl outline-none focus:bg-white focus:border-indigo-700 transition-all font-medium text-[13px] sm:text-[15px]"
             placeholder="e.g. Acme Corp"
             list="company-list"
           />
@@ -1176,29 +1176,29 @@ export default function CreatePO() {
         </div>
 
         {/* 2. Two tiles side by side: PO NUMBER and TOTAL QUANTITY */}
-        <div className="flex items-center gap-3 w-full">
+        <div className="flex items-center gap-2 sm:gap-3 w-full">
           {/* PO Number Badge */}
-          <div className="bg-indigo-50 px-4 py-3 rounded-2xl border border-indigo-100 flex flex-col items-center justify-center flex-1 min-w-0">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 mb-1 truncate">PO Number</span>
-            <span className="text-xl sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
+          <div className="bg-indigo-50 px-2 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl border border-indigo-100 flex flex-col items-center justify-center flex-1 min-w-0">
+            <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-700 mb-0.5 sm:mb-1 truncate">PO Number</span>
+            <span className="text-lg sm:text-2xl font-black font-mono text-indigo-900">{nextPoNo}</span>
           </div>
 
           {/* Quantity Badge */}
-          <div className="bg-white px-4 py-3 rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center flex-1 min-w-0 shadow-sm">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-1 truncate">Remaining / Total</span>
+          <div className="bg-white px-2 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl border border-[#e4e6f0] flex flex-col items-center justify-center flex-1 min-w-0 shadow-sm">
+            <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-[#565b73] mb-0.5 sm:mb-1 truncate">Remaining / Total</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl sm:text-2xl font-extrabold text-[#14172b]">
+              <span className="text-lg sm:text-2xl font-extrabold text-[#14172b]">
                 {Math.max(0, 
                   (importedFileMeta ? importedFileMeta.totalQty : sumTotalQty) 
                   - (importedFileMeta ? (importedFileMeta.packedQty || 0) : totalHistoricalPacked) 
                   - totalPackedPcs
                 )}
               </span>
-              <span className="text-sm font-bold text-slate-400">
+              <span className="text-xs sm:text-sm font-bold text-slate-400">
                 / {importedFileMeta ? importedFileMeta.totalQty : sumTotalQty}
               </span>
             </div>
-            <span className="text-[11px] text-[#565b73] font-medium mt-0.5 truncate">
+            <span className="text-[9px] sm:text-[11px] text-[#565b73] font-medium mt-0 sm:mt-0.5 truncate">
               Packed: <b className="text-indigo-700">{totalPackedPcs} pcs</b>
             </span>
           </div>

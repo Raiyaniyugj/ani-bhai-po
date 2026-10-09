@@ -200,12 +200,12 @@ function App() {
         <div className="min-h-screen bg-[#f4f5fa] text-[#14172b] font-jakarta">
           <header className="bg-white shadow-sm border-b border-[#e4e6f0]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between h-16 items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+              <div className="flex justify-between h-14 sm:h-16 items-center">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-sm">
                     P
                   </div>
-                  <h1 className="text-xl font-bold text-slate-800 tracking-tight">PO System</h1>
+                  <h1 className="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">PO System</h1>
                 </div>
                 <Navigation />
               </div>
@@ -213,7 +213,7 @@ function App() {
           </header>
 
           {/* Add bottom padding pb-40 for the mobile tab bar + floating action bars */}
-          <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 pb-40 md:pb-8">
+          <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-3 sm:py-8 pb-40 md:pb-8">
             <Routes>
               <Route path="/" element={<Navigate to="/create" replace />} />
               <Route path="/login" element={<AuthPage />} />
